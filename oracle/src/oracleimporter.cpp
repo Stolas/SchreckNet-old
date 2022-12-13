@@ -24,13 +24,12 @@ bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
     QList<SetToDownload> newSetList;
 
     bool ok;
-    setsMap = QtJson::Json::parse(QString(data), ok).toMap().value("data").toMap();
+    allCards = QtJson::Json::parse(QString(data), ok).toJsonArray();
     if (!ok) {
         qDebug() << "error: QtJson::Json::parse()";
         return false;
     }
 
-    QListIterator<QVariant> it(setsMap.values());
     QVariantMap map;
 
     QString shortName;
@@ -39,12 +38,31 @@ bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
     QString setType;
     QDate releaseDate;
 
-    while (it.hasNext()) {
-        map = it.next().toMap();
+    for (auto it : allCards) {
+        auto obj = it.toObject();
+        auto types = obj.value("types");
+
+        // if vampire
+        //     ['id', '_name', 'url', 'types', 'clans', 'capacity', 'disciplines', 'card_text', '_set', 'sets', 'scans', 'artists', 'group', 'ordered_sets', 'name_variants', 'name', 'printed_name']
+        // else:
+        //     ['id', '_name', 'url', 'types', 'card_text', '_set', 'sets', 'scans', 'artists', 'pool_cost', 'ordered_sets', 'name', 'printed_name']
+        //
+
+        //map = it.next().toMap();
         shortName = map.value("code").toString().toUpper();
         longName = map.value("name").toString();
         setCards = map.value("cards").toList();
         setType = map.value("type").toString();
+
+
+        // Properties:
+       //  'types', 'capacity', 'has_advanced', 'conviction_cost', 'ordered_sets', 'capacity_change', 'blood_cost',
+       //  'is_evolution', 'scans', 'name', 'printed_name', 'group', '_set', '_i18n', 'id', 'text_change', 'title',
+       //  'adv', 'card_text', 'clans', 'url', 'flavor_text', 'aka', 'name_variants', 'sets', 'rulings',
+       //  'multidisc', 'disciplines', 'burn_option', 'artists', 'pool_cost', 'variants', 'combo', 'has_evolution',
+       //  'banned', '_name'
+       //  
+
         // capitalize set type
         if (setType.length() > 0) {
             // basic grammar for words that aren't capitalized, like in "From the Vault"
@@ -62,11 +80,8 @@ bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
             }
             setType = setType.trimmed();
         }
-        if (!nonEnglishSets.contains(shortName)) {
-            releaseDate = map.value("releaseDate").toDate();
-        } else {
-            releaseDate = QDate();
-        }
+
+        releaseDate = map.value("releaseDate").toDate();
         newSetList.append(SetToDownload(shortName, longName, setCards, setType, releaseDate));
     }
 

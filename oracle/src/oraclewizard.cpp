@@ -41,16 +41,7 @@
 #define ALLSETS_URL_FALLBACK "https://www.mtgjson.com/api/v5/AllPrintings.json"
 #define MTGJSON_VERSION_URL "https://www.mtgjson.com/api/v5/Meta.json"
 
-#ifdef HAS_LZMA
-#define ALLSETS_URL "https://www.mtgjson.com/api/v5/AllPrintings.json.xz"
-#elif defined(HAS_ZLIB)
-#define ALLSETS_URL "https://www.mtgjson.com/api/v5/AllPrintings.json.zip"
-#else
-#define ALLSETS_URL "https://www.mtgjson.com/api/v5/AllPrintings.json"
-#endif
-
-#define TOKENS_URL "https://raw.githubusercontent.com/Cockatrice/Magic-Token/master/tokens.xml"
-#define SPOILERS_URL "https://raw.githubusercontent.com/Cockatrice/Magic-Spoiler/files/spoiler.xml"
+#define ALLSETS_URL "https://static.krcg.org/data/vtes.json"
 
 OracleWizard::OracleWizard(QWidget *parent) : QWizard(parent)
 {
@@ -68,10 +59,8 @@ OracleWizard::OracleWizard(QWidget *parent) : QWizard(parent)
         addPage(new IntroPage);
         addPage(new LoadSetsPage);
         addPage(new SaveSetsPage);
-        addPage(new LoadTokensPage);
         addPage(new OutroPage);
     } else {
-        addPage(new LoadSpoilersPage);
         addPage(new OutroPage);
     }
 
@@ -116,23 +105,6 @@ void OracleWizard::disableButtons()
 {
     button(QWizard::NextButton)->setDisabled(true);
     button(QWizard::BackButton)->setDisabled(true);
-}
-
-bool OracleWizard::saveTokensToFile(const QString &fileName)
-{
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly)) {
-        qDebug() << "File open (w) failed for" << fileName;
-        return false;
-    }
-
-    if (file.write(tokensData) == -1) {
-        qDebug() << "File write (w) failed for" << fileName;
-        return false;
-    }
-
-    file.close();
-    return true;
 }
 
 IntroPage::IntroPage(QWidget *parent) : OracleWizardPage(parent)
@@ -278,12 +250,6 @@ void LoadSetsPage::actLoadSetsFile()
     dialog.setFileMode(QFileDialog::ExistingFile);
 
     QString extensions = "*.json";
-#ifdef HAS_ZLIB
-    extensions += " *.zip";
-#endif
-#ifdef HAS_LZMA
-    extensions += " *.xz";
-#endif
     dialog.setNameFilter(tr("Sets JSON file (%1)").arg(extensions));
 
     if (!fileLineEdit->text().isEmpty() && QFile::exists(fileLineEdit->text())) {
@@ -360,7 +326,7 @@ void LoadSetsPage::downloadSetsFile(const QUrl &url)
     wizard()->setCardSourceVersion("unknown");
 
     const auto urlString = url.toString();
-    if (urlString == ALLSETS_URL || urlString == ALLSETS_URL_FALLBACK) {
+    if (urlString == ALLSETS_URL) {
         const auto versionUrl = QUrl::fromUserInput(MTGJSON_VERSION_URL);
         auto *versionReply = wizard()->nam->get(QNetworkRequest(versionUrl));
         connect(versionReply, &QNetworkReply::finished, [this, versionReply]() {
@@ -398,7 +364,7 @@ void LoadSetsPage::actDownloadProgressSetsFile(qint64 received, qint64 total)
         progressBar->setMaximum(static_cast<int>(total));
         progressBar->setValue(static_cast<int>(received));
     }
-    progressLabel->setText(tr("Downloading (%1MB)").arg((int)received / (1024 * 1024)));
+    progressLabel->setText(tr("Downloading (%1MiB)").arg((int)received / (1024 * 1024)));
 }
 
 void LoadSetsPage::actDownloadFinishedSetsFile()
@@ -449,78 +415,6 @@ void LoadSetsPage::readSetsFromByteArray(QByteArray data)
     progressLabel->show();
     progressBar->show();
 
-    // unzip the file if needed
-    if (data.startsWith(XZ_SIGNATURE)) {
-#ifdef HAS_LZMA
-        // zipped file
-        auto *inBuffer = new QBuffer(&data);
-        auto *outBuffer = new QBuffer(this);
-        inBuffer->open(QBuffer::ReadOnly);
-        outBuffer->open(QBuffer::WriteOnly);
-        XzDecompressor xz;
-        if (!xz.decompress(inBuffer, outBuffer)) {
-            zipDownloadFailed(tr("Xz extraction failed."));
-            return;
-        }
-        const auto &outBufferData = outBuffer->data();
-
-        future = QtConcurrent::run(
-            [this, &outBufferData] { return wizard()->importer->readSetsFromByteArray(outBufferData); });
-        watcher.setFuture(future);
-        return;
-#else
-        zipDownloadFailed(tr("Sorry, this version of Oracle does not support xz compressed files."));
-
-        wizard()->enableButtons();
-        setEnabled(true);
-        progressLabel->hide();
-        progressBar->hide();
-        return;
-#endif
-    } else if (data.startsWith(ZIP_SIGNATURE)) {
-#ifdef HAS_ZLIB
-        // zipped file
-        auto *inBuffer = new QBuffer(&data);
-        auto *outBuffer = new QBuffer(this);
-        QString fileName;
-        UnZip::ErrorCode ec;
-        UnZip uz;
-
-        ec = uz.openArchive(inBuffer);
-        if (ec != UnZip::Ok) {
-            zipDownloadFailed(tr("Failed to open Zip archive: %1.").arg(uz.formatError(ec)));
-            return;
-        }
-
-        if (uz.fileList().size() != 1) {
-            zipDownloadFailed(tr("Zip extraction failed: the Zip archive doesn't contain exactly one file."));
-            return;
-        }
-        fileName = uz.fileList().at(0);
-
-        outBuffer->open(QBuffer::ReadWrite);
-        ec = uz.extractFile(fileName, outBuffer);
-        if (ec != UnZip::Ok) {
-            zipDownloadFailed(tr("Zip extraction failed: %1.").arg(uz.formatError(ec)));
-            uz.closeArchive();
-            return;
-        }
-        const auto &outBufferData = outBuffer->data();
-
-        future = QtConcurrent::run(
-            [this, &outBufferData] { return wizard()->importer->readSetsFromByteArray(outBufferData); });
-        watcher.setFuture(future);
-        return;
-#else
-        zipDownloadFailed(tr("Sorry, this version of Oracle does not support zipped files."));
-
-        wizard()->enableButtons();
-        setEnabled(true);
-        progressLabel->hide();
-        progressBar->hide();
-        return;
-#endif
-    }
     // Start the computation.
     future = QtConcurrent::run([this, &data] { return wizard()->importer->readSetsFromByteArray(data); });
     watcher.setFuture(future);
@@ -652,78 +546,4 @@ bool SaveSetsPage::validatePage()
     }
 
     return true;
-}
-
-QString LoadTokensPage::getDefaultUrl()
-{
-    return TOKENS_URL;
-}
-
-QString LoadTokensPage::getCustomUrlSettingsKey()
-{
-    return "tokensurl";
-}
-
-QString LoadTokensPage::getDefaultSavePath()
-{
-    return SettingsCache::instance().getTokenDatabasePath();
-}
-
-QString LoadTokensPage::getWindowTitle()
-{
-    return tr("Save token database");
-}
-
-QString LoadTokensPage::getFileType()
-{
-    return tr("XML; token database (*.xml)");
-}
-
-void LoadTokensPage::retranslateUi()
-{
-    setTitle(tr("Tokens import"));
-    setSubTitle(tr("Please specify a compatible source for token data."));
-
-    urlLabel->setText(tr("Download URL:"));
-    urlButton->setText(tr("Restore default URL"));
-    pathLabel->setText(tr("The token database will be saved at the following location:") + "<br>" +
-                       SettingsCache::instance().getTokenDatabasePath());
-    defaultPathCheckBox->setText(tr("Save to a custom path (not recommended)"));
-}
-
-QString LoadSpoilersPage::getDefaultUrl()
-{
-    return SPOILERS_URL;
-}
-
-QString LoadSpoilersPage::getCustomUrlSettingsKey()
-{
-    return "spoilersurl";
-}
-
-QString LoadSpoilersPage::getDefaultSavePath()
-{
-    return SettingsCache::instance().getTokenDatabasePath();
-}
-
-QString LoadSpoilersPage::getWindowTitle()
-{
-    return tr("Save spoiler database");
-}
-
-QString LoadSpoilersPage::getFileType()
-{
-    return tr("XML; spoiler database (*.xml)");
-}
-
-void LoadSpoilersPage::retranslateUi()
-{
-    setTitle(tr("Spoilers import"));
-    setSubTitle(tr("Please specify a compatible source for spoiler data."));
-
-    urlLabel->setText(tr("Download URL:"));
-    urlButton->setText(tr("Restore default URL"));
-    pathLabel->setText(tr("The spoiler database will be saved at the following location:") + "<br>" +
-                       SettingsCache::instance().getSpoilerCardDatabasePath());
-    defaultPathCheckBox->setText(tr("Save to a custom path (not recommended)"));
 }

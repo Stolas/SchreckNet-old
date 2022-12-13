@@ -30,14 +30,6 @@ public:
     void enableButtons();
     void disableButtons();
     void retranslateUi();
-    void setTokensData(QByteArray _tokensData)
-    {
-        tokensData = std::move(_tokensData);
-    }
-    bool hasTokensData()
-    {
-        return !tokensData.isEmpty();
-    }
     void setCardSourceUrl(const QString &sourceUrl)
     {
         cardSourceUrl = sourceUrl;
@@ -54,7 +46,6 @@ public:
     {
         return cardSourceVersion;
     }
-    bool saveTokensToFile(const QString &fileName);
 
 public:
     OracleImporter *importer;
@@ -157,36 +148,6 @@ protected:
 
 private slots:
     void updateTotalProgress(int cardsImported, int setIndex, const QString &setName);
-};
-
-class LoadSpoilersPage : public SimpleDownloadFilePage
-{
-    Q_OBJECT
-public:
-    explicit LoadSpoilersPage(QWidget * = nullptr){};
-    void retranslateUi() override;
-
-protected:
-    QString getDefaultUrl() override;
-    QString getCustomUrlSettingsKey() override;
-    QString getDefaultSavePath() override;
-    QString getWindowTitle() override;
-    QString getFileType() override;
-};
-
-class LoadTokensPage : public SimpleDownloadFilePage
-{
-    Q_OBJECT
-public:
-    explicit LoadTokensPage(QWidget * = nullptr){};
-    void retranslateUi() override;
-
-protected:
-    QString getDefaultUrl() override;
-    QString getCustomUrlSettingsKey() override;
-    QString getDefaultSavePath() override;
-    QString getWindowTitle() override;
-    QString getFileType() override;
 };
 
 #endif

@@ -65,28 +65,6 @@ endif()
 
 include_directories(../cockatrice/src)
 
-# Libz is required to support zipped files
-find_package(ZLIB)
-if(ZLIB_FOUND)
-  include_directories(${ZLIB_INCLUDE_DIRS})
-  add_definitions("-DHAS_ZLIB")
-
-  set(oracle_SOURCES ${oracle_SOURCES} src/zip/unzip.cpp src/zip/zipglobal.cpp)
-else()
-  message(STATUS "Oracle: zlib not found; ZIP support disabled")
-endif()
-
-# LibLZMA is required to support xz files
-find_package(LibLZMA)
-if(LIBLZMA_FOUND)
-  include_directories(${LIBLZMA_INCLUDE_DIRS})
-  add_definitions("-DHAS_LZMA")
-
-  set(oracle_SOURCES ${oracle_SOURCES} src/lzma/decompress.cpp)
-else()
-  message(STATUS "Oracle: LibLZMA not found; xz support disabled")
-endif()
-
 set(ORACLE_MAC_QM_INSTALL_DIR "oracle.app/Contents/Resources/translations")
 set(ORACLE_UNIX_QM_INSTALL_DIR "share/oracle/translations")
 set(ORACLE_WIN32_QM_INSTALL_DIR "translations")
