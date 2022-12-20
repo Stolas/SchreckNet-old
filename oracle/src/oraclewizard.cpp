@@ -253,9 +253,9 @@ void LoadSetsPage::actLoadSetsFile()
 bool LoadSetsPage::validatePage()
 {
     // once the import is finished, we call next(); skip validation
-    if (wizard()->importer->getSets().count() > 0) {
-        return true;
-    }
+    // if (wizard()->importer->getSets().count() > 0) {
+    //     return true;
+    // }
 
     // else, try to import sets
     if (urlRadioButton->isChecked()) {
@@ -266,7 +266,7 @@ bool LoadSetsPage::validatePage()
             return false;
         }
 
-        progressLabel->setText(tr("Downloading (0MB)"));
+        progressLabel->setText(tr("Downloading (0MiB)"));
         // show an infinite progressbar
         progressBar->setMaximum(0);
         progressBar->setMinimum(0);
@@ -296,7 +296,8 @@ bool LoadSetsPage::validatePage()
         wizard()->setCardSourceUrl(setsFile.fileName());
         wizard()->setCardSourceVersion("unknown");
 
-        readSetsFromByteArray(setsFile.readAll());
+        qDebug() << "3";
+        readJsonFromByteArray(setsFile.readAll());
     }
 
     return false;
@@ -383,11 +384,11 @@ void LoadSetsPage::actDownloadFinishedSetsFile()
         wizard()->settings->remove("allsetsurl");
     }
 
-    readSetsFromByteArray(reply->readAll());
+    readJsonFromByteArray(reply->readAll());
     reply->deleteLater();
 }
 
-void LoadSetsPage::readSetsFromByteArray(QByteArray data)
+void LoadSetsPage::readJsonFromByteArray(QByteArray data)
 {
     // show an infinite progressbar
     progressBar->setMaximum(0);
@@ -398,7 +399,7 @@ void LoadSetsPage::readSetsFromByteArray(QByteArray data)
     progressBar->show();
 
     // Start the computation.
-    future = QtConcurrent::run([this, &data] { return wizard()->importer->readSetsFromByteArray(data); });
+    future = QtConcurrent::run([this, &data] { return wizard()->importer->readJsonFromByteArray(data); });
     watcher.setFuture(future);
 }
 

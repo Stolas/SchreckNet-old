@@ -103,7 +103,7 @@ public:
 protected:
     void initializePage() override;
     bool validatePage() override;
-    void readSetsFromByteArray(QByteArray data);
+    void readJsonFromByteArray(QByteArray data);
     void downloadSetsFile(const QUrl &url);
 
 private:

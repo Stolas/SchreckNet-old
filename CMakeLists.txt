@@ -24,6 +24,8 @@ option(WITH_ORACLE "build oracle" ON)
 option(WITH_DBCONVERTER "build dbconverter" ON)
 # Compile tests
 option(TEST "build tests" OFF)
+# Create compile_commands.json
+option(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
 # Default to "Release" build type
 # User-provided value for CMAKE_BUILD_TYPE must be checked before the PROJECT() call
