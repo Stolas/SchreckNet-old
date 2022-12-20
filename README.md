@@ -1,4 +1,4 @@
-<p align='center'><img src=https://github.com/Stolas/SchreckNet/blob/master/meta/schecknet_logo.png></p>
+<p align='center'><img src=https://github.com/Stolas/SchreckNet/blob/master/meta/images/schecknet_logo.png></p>
 
 ---
 
@@ -10,7 +10,7 @@ The program's server design prevents users from manipulating the game for unfair
 
 Portions of the materials are the copyrights and trademarks of Paradox Interactive AB, and are used with permission. All rights reserved. For more information please visit [white-wolf.com](http://www.white-wolf.com/).
 
-![Dark Pack](meta/dark-pack.png)
+![Dark Pack](meta/images/dark-pack.png)
 
 
 # Download [![Cockatrice Eternal Download Count](https://img.shields.io/github/downloads/cockatrice/cockatrice/total.svg)](https://tooomm.github.io/github-release-stats/?username=Cockatrice&repository=Cockatrice)

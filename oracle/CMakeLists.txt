@@ -69,47 +69,18 @@ set(ORACLE_MAC_QM_INSTALL_DIR "oracle.app/Contents/Resources/translations")
 set(ORACLE_UNIX_QM_INSTALL_DIR "share/oracle/translations")
 set(ORACLE_WIN32_QM_INSTALL_DIR "translations")
 
-if(Qt6_FOUND)
-  # Qt6 Translations are linked after the executable is created in manual mode
-  qt6_add_executable(
-    oracle
-    WIN32
-    MACOSX_BUNDLE
-    ${oracle_SOURCES}
-    ${oracle_RESOURCES_RCC}
-    ${oracle_MOC_SRCS}
-    MANUAL_FINALIZATION
-  )
-elseif(Qt5_FOUND)
-  # Qt5 Translations need to be linked at executable creation time
-  if(Qt5LinguistTools_FOUND)
-    if(UPDATE_TRANSLATIONS)
-      qt5_create_translation(oracle_QM ${translate_SRCS} ${oracle_TS})
-    else()
-      qt5_add_translation(oracle_QM ${oracle_TS})
-    endif()
-  endif()
-  add_executable(oracle WIN32 MACOSX_BUNDLE ${oracle_MOC_SRCS} ${oracle_QM} ${oracle_RESOURCES_RCC} ${oracle_SOURCES})
-  if(UNIX)
-    if(APPLE)
-      install(FILES ${oracle_QM} DESTINATION ${ORACLE_MAC_QM_INSTALL_DIR})
-    else()
-      install(FILES ${oracle_QM} DESTINATION ${ORACLE_UNIX_QM_INSTALL_DIR})
-    endif()
-  elseif(WIN32)
-    install(FILES ${oracle_QM} DESTINATION ${ORACLE_WIN32_QM_INSTALL_DIR})
-  endif()
-endif()
+# Qt6 Translations are linked after the executable is created in manual mode
+qt6_add_executable(
+  oracle
+  WIN32
+  MACOSX_BUNDLE
+  ${oracle_SOURCES}
+  ${oracle_RESOURCES_RCC}
+  ${oracle_MOC_SRCS}
+  MANUAL_FINALIZATION
+)
 
 target_link_libraries(oracle PUBLIC ${ORACLE_QT_MODULES})
-
-if(ZLIB_FOUND)
-  target_link_libraries(oracle PUBLIC ${ZLIB_LIBRARIES})
-endif()
-
-if(LIBLZMA_FOUND)
-  target_link_libraries(oracle PUBLIC ${LIBLZMA_LIBRARIES})
-endif()
 
 if(UNIX)
   if(APPLE)

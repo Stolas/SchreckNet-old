@@ -66,10 +66,10 @@ if(WIN32)
   else()
     set(QTDIR
         ""
-        CACHE PATH "Path to Qt (e.g. C:/Qt/5.7/msvc2015_64)"
+        CACHE PATH "Path to Qt (e.g. C:/Qt/6.4/msvc2015_64)"
     )
     message(
-      WARNING "QTDIR variable is missing.  Please set this variable to specify path to Qt (e.g. C:/Qt/5.7/msvc2015_64)"
+      WARNING "QTDIR variable is missing.  Please set this variable to specify path to Qt (e.g. C:/Qt/6.4/msvc2015_64)"
     )
   endif()
 endif()
@@ -84,8 +84,7 @@ if(NOT DEFINED GIT_TAG_RELEASENAME)
 endif()
 
 # Use c++17 for all targets
-set(CMAKE_CXX_STANDARD
-    17
+set(CMAKE_CXX_STANDARD 17
     CACHE STRING "C++ ISO Standard"
 )
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -94,7 +93,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 
 # Search path for cmake modules
-set(COCKATRICE_CMAKE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+set(COCKATRICE_CMAKE_PATH "${PROJECT_SOURCE_DIR}/meta/cmake")
 list(INSERT CMAKE_MODULE_PATH 0 "${COCKATRICE_CMAKE_PATH}")
 
 include(getversion)
@@ -281,11 +280,7 @@ if(UNIX)
       set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
       set(CPACK_DEBIAN_PACKAGE_SECTION "games")
       set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://github.com/Cockatrice/Cockatrice")
-      if(Qt6_FOUND)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6multimedia6, libqt6svg6, qt6-qpa-plugins")
-      elseif(Qt5_FOUND)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5multimedia5-plugins, libqt5svg5")
-      endif()
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6multimedia6, libqt6svg6, qt6-qpa-plugins")
     endif()
   endif()
 elseif(WIN32)
