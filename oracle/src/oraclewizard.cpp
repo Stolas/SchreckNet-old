@@ -26,19 +26,6 @@
 #include <QtConcurrent>
 #include <QtGui>
 
-#ifdef HAS_LZMA
-#include "lzma/decompress.h"
-#endif
-
-#ifdef HAS_ZLIB
-#include "zip/unzip.h"
-#endif
-
-#define ZIP_SIGNATURE "PK"
-// Xz stream header: 0xFD + "7zXZ"
-#define XZ_SIGNATURE "\xFD\x37\x7A\x58\x5A"
-#define MTGJSON_V4_URL_COMPONENT "mtgjson.com/files/"
-#define ALLSETS_URL_FALLBACK "https://www.mtgjson.com/api/v5/AllPrintings.json"
 #define MTGJSON_VERSION_URL "https://www.mtgjson.com/api/v5/Meta.json"
 
 #define ALLSETS_URL "https://static.krcg.org/data/vtes.json"
@@ -171,7 +158,7 @@ void IntroPage::retranslateUi()
 {
     setTitle(tr("Introduction"));
     label->setText(tr("This wizard will import the list of sets, cards, and tokens "
-                      "that will be used by Cockatrice."));
+                      "that will be used by SchreckNet."));
     languageLabel->setText(tr("Interface language:"));
     versionLabel->setText(tr("Version:") + QString(" %1").arg(VERSION_STRING));
 }
@@ -180,8 +167,8 @@ void OutroPage::retranslateUi()
 {
     setTitle(tr("Finished"));
     setSubTitle(tr("The wizard has finished.") + "<br>" +
-                tr("You can now start using Cockatrice with the newly updated cards.") + "<br><br>" +
-                tr("If the card databases don't reload automatically, restart the Cockatrice client."));
+                tr("You can now start using SchreckNet with the newly updated cards.") + "<br><br>" +
+                tr("If the card databases don't reload automatically, restart the SchreckNet client."));
 }
 
 LoadSetsPage::LoadSetsPage(QWidget *parent) : OracleWizardPage(parent)
@@ -272,11 +259,6 @@ bool LoadSetsPage::validatePage()
 
     // else, try to import sets
     if (urlRadioButton->isChecked()) {
-        // If a user attempts to download from V4, redirect them to V5
-        if (urlLineEdit->text().contains(MTGJSON_V4_URL_COMPONENT)) {
-            actRestoreDefaultUrl();
-        }
-
         const auto url = QUrl::fromUserInput(urlLineEdit->text());
 
         if (!url.isValid()) {
@@ -420,26 +402,6 @@ void LoadSetsPage::readSetsFromByteArray(QByteArray data)
     watcher.setFuture(future);
 }
 
-void LoadSetsPage::zipDownloadFailed(const QString &message)
-{
-    wizard()->enableButtons();
-    setEnabled(true);
-    progressLabel->hide();
-    progressBar->hide();
-
-    QMessageBox::StandardButton reply;
-    reply = static_cast<QMessageBox::StandardButton>(QMessageBox::question(
-        this, tr("Error"), message + "<br>" + tr("Do you want to download the uncompressed file instead?"),
-        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes));
-
-    if (reply == QMessageBox::Yes) {
-        urlRadioButton->setChecked(true);
-        urlLineEdit->setText(ALLSETS_URL_FALLBACK);
-
-        wizard()->next();
-    }
-}
-
 void LoadSetsPage::importFinished()
 {
     wizard()->enableButtons();
@@ -497,7 +459,7 @@ void SaveSetsPage::retranslateUi()
     setTitle(tr("Sets imported"));
     setSubTitle(tr("The following sets have been found:"));
 
-    saveLabel->setText(tr("Press \"Save\" to store the imported cards in the Cockatrice database."));
+    saveLabel->setText(tr("Press \"Save\" to store the imported cards in the SchreckNet database."));
     pathLabel->setText(tr("The card database will be saved at the following location:") + "<br>" +
                        SettingsCache::instance().getCardDatabasePath());
     defaultPathCheckBox->setText(tr("Save to a custom path (not recommended)"));

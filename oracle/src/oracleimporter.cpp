@@ -40,7 +40,18 @@ bool OracleImporter::readSetsFromByteArray(const QByteArray &data)
 
     for (auto it : allCards) {
         auto obj = it.toObject();
-        auto types = obj.value("types");
+        auto types = obj["types"].toArray();
+
+
+        /* Uniform elements */
+
+
+        if (types.contains("vampire")) {
+            /* Parse as Crypt Card */
+        } else {
+            /* Parse as Library Card */
+        }
+
 
         // if vampire
         //     ['id', '_name', 'url', 'types', 'clans', 'capacity', 'disciplines', 'card_text', '_set', 'sets', 'scans', 'artists', 'group', 'ordered_sets', 'name_variants', 'name', 'printed_name']
