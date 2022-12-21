@@ -1,5 +1,4 @@
-#ifndef ORACLEIMPORTER_H
-#define ORACLEIMPORTER_H
+#pragma once
 
 #include <QMap>
 #include <QVariant>
@@ -38,6 +37,10 @@ public:
     {
         return dataDir;
     }
+    const QJsonArray getAllCards() const
+    {
+        return allCards;
+    }
     void clear();
 
 protected:
@@ -45,4 +48,3 @@ protected:
     void sortAndReduceColors(QString &colors);
 };
 
-#endif

@@ -253,9 +253,9 @@ void LoadSetsPage::actLoadSetsFile()
 bool LoadSetsPage::validatePage()
 {
     // once the import is finished, we call next(); skip validation
-    // if (wizard()->importer->getSets().count() > 0) {
-    //     return true;
-    // }
+    if (wizard()->importer->getAllCards().size() > 0) {
+        return true;
+    }
 
     // else, try to import sets
     if (urlRadioButton->isChecked()) {
@@ -399,7 +399,10 @@ void LoadSetsPage::readJsonFromByteArray(QByteArray data)
     progressBar->show();
 
     // Start the computation.
-    future = QtConcurrent::run([this, &data] { return wizard()->importer->readJsonFromByteArray(data); });
+    future = QtConcurrent::run([this, &data] {
+        qDebug() << QString(data);
+        return wizard()->importer->readJsonFromByteArray(data);
+    });
     watcher.setFuture(future);
 }
 
@@ -414,7 +417,7 @@ void LoadSetsPage::importFinished()
         wizard()->next();
     } else {
         QMessageBox::critical(this, tr("Error"),
-                              tr("The file was retrieved successfully, but it does not contain any sets data."));
+                              tr("The file was retrieved successfully, but it does not contain any card data."));
     }
 }
 

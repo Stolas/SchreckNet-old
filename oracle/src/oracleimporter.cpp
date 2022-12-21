@@ -1,7 +1,6 @@
 #include "oracleimporter.h"
 
-#include "carddbparser/cockatricexml4.h"
-#include "qt-json/json.h"
+#include "carddbparser/schrecknetxml.h"
 
 #include <QtWidgets>
 #include <algorithm>
@@ -13,17 +12,13 @@ OracleImporter::OracleImporter(const QString &_dataDir, QObject *parent) : CardD
 
 bool OracleImporter::readJsonFromByteArray(const QByteArray &data)
 {
-    auto jsonData = QString(data);
-    bool ok;
-
-    qDebug() << "Size: " << jsonData.length() << "First char: " << jsonData[0];
-
-    allCards = QtJson::Json::parse(jsonData, ok).toJsonArray();
-    if (!ok) {
-        qDebug() << "error: QtJson::Json::parse()";
+    auto jsonDoc = QJsonDocument::fromJson(data);
+    if (jsonDoc.isNull()) {
+        qDebug() << "error: failed to parse JSON";
         return false;
     }
 
+    allCards = jsonDoc.array();
     qDebug() << "ok: created allCard list";
     return true;
 }
@@ -88,7 +83,7 @@ CardInfoPtr OracleImporter::addCard(QString name,
         properties.insert("coloridentity", allColorIdent);
     }
 
-    // DETECT CARD POSITIONING INFO
+    // Todo; DETECT CARD POSITIONING INFO
 
     // cards that enter the field tapped
     bool cipt = text.contains(" it enters the battlefield tapped") ||
@@ -152,8 +147,7 @@ void OracleImporter::sortAndReduceColors(QString &colors)
 
 int OracleImporter::startImport()
 {
-    int numCards = 0;
-    int setCards = 0, setIndex = 0;
+    int numCards = 0;// setCards = 0, setIndex = 0;
 
     QVariantHash properties;
     QString id;
@@ -210,7 +204,7 @@ int OracleImporter::startImport()
 
 bool OracleImporter::saveToFile(const QString &fileName, const QString &sourceUrl, const QString &sourceVersion)
 {
-    CockatriceXml4Parser parser;
+    SchreckNetXmlParser parser;
     return parser.saveToFile(sets, cards, fileName, sourceUrl, sourceVersion);
 }
 

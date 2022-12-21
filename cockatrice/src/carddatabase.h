@@ -302,7 +302,7 @@ public:
 
     // positioning
     bool getCipt() const
-    {
+    { /* Comes into Play Tapped */
         return cipt;
     }
     int getTableRow() const
