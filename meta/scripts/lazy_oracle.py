@@ -3,10 +3,6 @@
 import requests
 import json
 from xml.dom import minidom
-# const QStringList mainCardTypes = {"Retainer", "Imbued",     "Equipment",        "Reaction",        "Vampire",
-#                                        "Ally",     "Power",      "Political Action", "Action Modifier", "Action",
-#                                        "Event",    "Conviction", "Combat",           "Master"};
-
 
 discipline_archive = {}
 discipline_archive['abo'] = "Abombwe"
@@ -46,6 +42,14 @@ discipline_archive['vis'] = "Visceratika"
 discipline_archive['viz'] = "Vision"
 
 
+def simple_json_to_xml(root, card, key, name):
+    elem = root.createElement(key)
+    for x in card['properties'].get(key, []):
+        new_elem = root.createElement(name)
+        new_elem.setAttribute("name", x)
+        elem.appendChild(new_elem)
+    return elem
+
 def create_card(root, card):
     new_card = root.createElement('card')
     new_card.setAttribute('id', str(card['id']))
@@ -56,7 +60,7 @@ def create_card(root, card):
     text = root.createTextNode('text')
     card_text = card['text']
     card_text = card_text.replace("\n", "\\n")
-    text.data = card_text
+    text.data = card_text.encode("utf-8").decode()
     text_element.appendChild(text)
     new_card.appendChild(text_element)
 
@@ -67,9 +71,16 @@ def create_card(root, card):
         if card['type'] == 'crypt':
             properties.setAttribute('capacity', str(card['properties']['capacity']))
             properties.setAttribute('group', str(card['properties']['group']))
+        else:
+            properties.setAttribute('pool', str(card['properties']['pool_cost']))
+            properties.setAttribute('blood', str(card['properties']['blood_cost']))
     except KeyError:
         # Likely a token
         pass
+
+    # Types, clans
+    properties.appendChild(simple_json_to_xml(root, card, 'types', 'type'))
+    properties.appendChild(simple_json_to_xml(root, card, 'clans', 'clan'))
 
     # Disciplines
     disciplines = root.createElement('disciplines')
@@ -97,8 +108,18 @@ def create_card(root, card):
     except KeyError:
         pass
 
-    # Generic
+    # Sets
+    sets = root.createElement('sets')
+    for set_ in card['properties'].get('sets',[]):
+        set_info = card['properties']['sets'][set_][0]
+        ss = root.createElement("set")
+        ss.setAttribute("name", set_)
+        ss.setAttribute("rarity", set_info.get('rarity', 'POD'))
+        #ss.setAttribute("frequency", set_info['frequency'])
+        sets.appendChild(ss)
+    properties.appendChild(sets)
 
+    # Generic
 
     new_card.appendChild(properties)
     return new_card
@@ -146,9 +167,8 @@ def create_schrecknetxml(card_db):
     xml.appendChild(tokens)
     xml.appendChild(sets)
 
-    with open("schrecknet.xml", "w") as fd:
-        import ipdb; ipdb.set_trace()
-        fd.write(root.toprettyxml(indent ="\t"))
+    with open("schrecknet.xml", "wb") as fd:
+        fd.write(root.toprettyxml(indent ="\t", encoding="utf-16"))
 
 def add_card(card_id, card_type, name, picture_url, text, properties):
     # Todo; extra parsing of the card text here.
@@ -174,19 +194,16 @@ def load_json():
             # Parse as Library Card
             card_type = "library"
             properties["pool_cost"] = card.get("pool_cost",0)
-            properties["blood_cost"] = card.get("pool_cost",0)
+            properties["blood_cost"] = card.get("blood_cost",0)
 
         card_id = card["id"]
         name = card["_name"]
         text = card["card_text"];
         picture_url = card["url"];
-        properties["clan"] = card.get("clans", None)
-        # Todo; Parse sets.
+        properties["clans"] = card.get("clans", [])
+        properties["types"] = card.get("types", [])
         properties["sets"] = card["sets"];
-        # card_was_in_sets = []
-        # for card_name in sets:
-        #     card_set = sets[card_name][0]
-        #     import ipdb; ipdb.set_trace()
+
         all_cards.append(add_card(card_id, card_type, name, picture_url, text, properties))
     return all_cards
 
