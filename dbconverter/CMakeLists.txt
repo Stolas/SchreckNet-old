@@ -7,8 +7,7 @@ set(dbconverter_SOURCES
     src/mocks.cpp
     ../cockatrice/src/carddatabase.cpp
     ../cockatrice/src/carddbparser/carddatabaseparser.cpp
-    ../cockatrice/src/carddbparser/cockatricexml3.cpp
-    ../cockatrice/src/carddbparser/cockatricexml4.cpp
+    ../cockatrice/src/carddbparser/schrecknetxml.cc
     ../cockatrice/src/settings/settingsmanager.cpp
     ${VERSION_STRING_CPP}
 )

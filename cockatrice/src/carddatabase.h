@@ -182,24 +182,16 @@ public:
                       const QString &_text = QString(),
                       bool _isToken = false,
                       QVariantHash _properties = QVariantHash(),
-                      const QList<CardRelation *> &_relatedCards = QList<CardRelation *>(),
-                      const QList<CardRelation *> &_reverseRelatedCards = QList<CardRelation *>(),
                       CardInfoPerSetMap _sets = CardInfoPerSetMap(),
-                      bool _cipt = false,
-                      int _tableRow = 0,
-                      bool _upsideDownArt = false);
+                      int _tableRow = 0);
     ~CardInfo() override;
 
     static CardInfoPtr newInstance(const QString &_name = QString(),
                                    const QString &_text = QString(),
                                    bool _isToken = false,
                                    QVariantHash _properties = QVariantHash(),
-                                   const QList<CardRelation *> &_relatedCards = QList<CardRelation *>(),
-                                   const QList<CardRelation *> &_reverseRelatedCards = QList<CardRelation *>(),
                                    CardInfoPerSetMap _sets = CardInfoPerSetMap(),
-                                   bool _cipt = false,
-                                   int _tableRow = 0,
-                                   bool _upsideDownArt = false);
+                                   int _tableRow = 0 );
 
     void setSmartPointer(CardInfoPtr _ptr)
     {

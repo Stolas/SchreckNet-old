@@ -47,8 +47,7 @@ void AbstractCardItem::cardInfoUpdated()
     if (!info && !name.isEmpty()) {
         QVariantHash properties = QVariantHash();
 
-        info = CardInfo::newInstance(name, "", true, QVariantHash(), QList<CardRelation *>(), QList<CardRelation *>(),
-                                     CardInfoPerSetMap(), false, -1, false);
+        info = CardInfo::newInstance(name, "", true, QVariantHash(), CardInfoPerSetMap(), -1);
     }
     if (info.data()) {
         connect(info.data(), SIGNAL(pixmapUpdated()), this, SLOT(pixmapUpdated()));

@@ -220,15 +220,10 @@ CardInfo::CardInfo(const QString &_name,
                    const QString &_text,
                    bool _isToken,
                    QVariantHash _properties,
-                   const QList<CardRelation *> &_relatedCards,
-                   const QList<CardRelation *> &_reverseRelatedCards,
                    CardInfoPerSetMap _sets,
-                   bool _cipt,
-                   int _tableRow,
-                   bool _upsideDownArt)
-    : name(_name), text(_text), isToken(_isToken), properties(std::move(_properties)), relatedCards(_relatedCards),
-      reverseRelatedCards(_reverseRelatedCards), sets(std::move(_sets)), cipt(_cipt), tableRow(_tableRow),
-      upsideDownArt(_upsideDownArt)
+                   int _tableRow )
+    : name(_name), text(_text), isToken(_isToken), properties(std::move(_properties)), 
+      sets(std::move(_sets)), tableRow(_tableRow)
 {
     pixmapCacheKey = QLatin1String("card_") + name;
     simpleName = CardInfo::simplifyName(name);
@@ -245,15 +240,10 @@ CardInfoPtr CardInfo::newInstance(const QString &_name,
                                   const QString &_text,
                                   bool _isToken,
                                   QVariantHash _properties,
-                                  const QList<CardRelation *> &_relatedCards,
-                                  const QList<CardRelation *> &_reverseRelatedCards,
                                   CardInfoPerSetMap _sets,
-                                  bool _cipt,
-                                  int _tableRow,
-                                  bool _upsideDownArt)
+                                  int _tableRow)
 {
-    CardInfoPtr ptr(new CardInfo(_name, _text, _isToken, std::move(_properties), _relatedCards, _reverseRelatedCards,
-                                 _sets, _cipt, _tableRow, _upsideDownArt));
+    CardInfoPtr ptr(new CardInfo(_name, _text, _isToken, std::move(_properties), _sets, _tableRow));
     ptr->setSmartPointer(ptr);
 
     for (const CardInfoPerSet &set : _sets) {
@@ -331,7 +321,7 @@ CardDatabase::CardDatabase(QObject *parent) : QObject(parent), loadStatus(NotLoa
     qRegisterMetaType<CardInfoPtr>("CardSetPtr");
 
     // add new parsers here
-    availableParsers << new SchreckNetXmlParser;
+    availableParsers << new SchrecknetParser;
 
     for (auto &parser : availableParsers) {
         connect(parser, SIGNAL(addCard(CardInfoPtr)), this, SLOT(addCard(CardInfoPtr)), Qt::DirectConnection);

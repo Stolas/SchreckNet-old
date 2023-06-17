@@ -1,4 +1,4 @@
-#include "schrecknet.h"
+#include "schrecknetxml.h"
 
 #include <QCoreApplication>
 #include <QDebug>
@@ -8,8 +8,8 @@
 
 #define SCHRECKNET_XML_TAGNAME "schrecknetxml"
 #define SCHRECKNET_XML_TAGVER 1
-#define SCHRECKNET_XML_SCHEMALOCATION                                                                                 \
-    "https://raw.githubusercontent.com/Cockatrice/Cockatrice/master/doc/carddatabase_v3/cards.xsd"
+//#define SCHRECKNET_XML_SCHEMALOCATION                                                                                 \
+//    "https://raw.githubusercontent.com/Cockatrice/Cockatrice/master/doc/carddatabase_v3/cards.xsd"
 
 bool SchrecknetParser::getCanParseFile(const QString &fileName, QIODevice &device)
 {
@@ -60,7 +60,7 @@ void SchrecknetParser::parseFile(QIODevice &device)
                 } else if (name == "library_cards") {
                     loadLibraryCardsFromXml(xml);
                 } else if (name == "tokens") {
-                    loadTokensCardsFromXml(xml);
+                    loadTokensFromXml(xml);
                 } else if (!name.isEmpty()) {
                     qDebug() << "[SchrecknetParser] Unknown item" << name << ", trying to continue anyway";
                     xml.skipCurrentElement();
@@ -79,16 +79,19 @@ void SchrecknetParser::loadSetsFromXml(QXmlStreamReader &xml)
 
         auto name = xml.name().toString();
         if (name == "set") {
-            auto attributes = xml.attributes();
+            auto attrs = xml.attributes();
             QString name;
             QDate releaseDate;
 
-            name = attributes.value("name");
-            release_date = QDate::fromString(attributes.value("release_date"), Qt::ISODate);
+            name = attrs.value("name").toString();
+            releaseDate = QDate::fromString(attrs.value("release_date").toString(), Qt::ISODate);
 
             internalAddSet(name, releaseDate); // Todo; find and refactor internalAddSet
         }
     }
+}
+void SchrecknetParser::loadTokensFromXml(QXmlStreamReader &xml)
+{
 }
 
 QString SchrecknetParser::getMainCardType(QString &type)
@@ -130,8 +133,7 @@ QString SchrecknetParser::getMainCardType(QString &type)
     return result;
 }
 
-void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
-{
+void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
     while (!xml.atEnd()) {
         if (xml.readNext() == QXmlStreamReader::EndElement) {
             break;
@@ -148,8 +150,8 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
 
             auto attrs = xml.attributes();
             id = attrs.value("id").toString();
-            name = attributes.value("name").toString();
-            name = attributes.value("picture").toString();
+            name = attrs.value("name").toString();
+            auto picURL = attrs.value("picture").toString();
 
             while (!xml.atEnd()) {
                 if (xml.readNext() == QXmlStreamReader::EndElement) {
@@ -163,12 +165,16 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
                 } else if (xmlName == "properties") {
                     attrs = xml.attributes();
 
+                    int capacity = 0;
+                    int group = 0;
+                    QString pool = "";
+                    QString blood = "";
                     if (isCrypt) {
-                        capacity = attrs.value("capacity").toInt()
-                        group = attrs.value("group").toInt()
+                        capacity = attrs.value("capacity").toInt();
+                        group = attrs.value("group").toInt();
                     } else {
-                        auto pool = attrs.value("pool").toString()
-                        auto blood = attrs.value("blood").toString()
+                        pool = attrs.value("pool").toString();
+                        blood = attrs.value("blood").toString();
                     }
 
                     while (!xml.atEnd()) {
@@ -198,18 +204,21 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
                         }
                     }
                 }
-            CardInfoPtr newCard = CardInfo::newInstance(name, text, false, properties, sets, tableRow, true);
-            emit addCard(newCard);
+                CardInfoPtr newCard = CardInfo::newInstance(name, text, false, properties, sets, tableRow);
+                emit addCard(newCard);
+            }
         }
     }
 }
 
-void SchrecknetParser::loadCryptCardsFromXml(QXmlStreamReader &xml)
-    return loadCryptCardsFromXml(xml, true);
+
+void SchrecknetParser::loadCryptCardsFromXml(QXmlStreamReader & xml)
+{
+    return loadCardsFromXml(xml, true);
 }
 
-void SchrecknetParser::loadLibraryCardsFromXml(QXmlStreamReader &xml)
-    return loadCryptCardsFromXml(xml, false);
+void SchrecknetParser::loadLibraryCardsFromXml(QXmlStreamReader & xml) {
+    return loadCardsFromXml(xml, false);
 }
 
 static QXmlStreamWriter &operator<<(QXmlStreamWriter &xml, const CardSetPtr &set)
@@ -368,7 +377,7 @@ bool SchrecknetParser::saveToFile(SetNameMap sets,
     xml.writeStartElement(SCHRECKNET_XML_TAGNAME);
     xml.writeAttribute("version", QString::number(SCHRECKNET_XML_TAGVER));
     xml.writeAttribute("xmlns:xsi", COCKATRICE_XML_XSI_NAMESPACE);
-    xml.writeAttribute("xsi:schemaLocation", SCHRECKNET_XML_SCHEMALOCATION);
+    //xml.writeAttribute("xsi:schemaLocation", SCHRECKNET_XML_SCHEMALOCATION);
 
     xml.writeStartElement("info");
     xml.writeTextElement("author", QCoreApplication::applicationName() + QString(" %1").arg(VERSION_STRING));

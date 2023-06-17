@@ -30,8 +30,6 @@ protected:
     static SetNameMap sets;
 
     CardSetPtr internalAddSet(const QString &setName,
-                              const QString &longName = "",
-                              const QString &setType = "",
                               const QDate &releaseDate = QDate());
 signals:
     virtual void addCard(CardInfoPtr card) = 0;

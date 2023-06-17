@@ -16,8 +16,7 @@ add_executable(
   ${VERSION_STRING_CPP}
   ../../cockatrice/src/carddatabase.cpp
   ../../cockatrice/src/carddbparser/carddatabaseparser.cpp
-  ../../cockatrice/src/carddbparser/cockatricexml3.cpp
-  ../../cockatrice/src/carddbparser/cockatricexml4.cpp
+  ../../cockatrice/src/carddbparser/schrecknetxml.cc
   ../../cockatrice/src/settings/settingsmanager.cpp
   carddatabase_test.cpp
   mocks.cpp
@@ -28,8 +27,7 @@ add_executable(
   ${VERSION_STRING_CPP}
   ../../cockatrice/src/carddatabase.cpp
   ../../cockatrice/src/carddbparser/carddatabaseparser.cpp
-  ../../cockatrice/src/carddbparser/cockatricexml3.cpp
-  ../../cockatrice/src/carddbparser/cockatricexml4.cpp
+  ../../cockatrice/src/carddbparser/schrecknetxml.cc
   ../../cockatrice/src/cardfilter.cpp
   ../../cockatrice/src/filter_string.cpp
   ../../cockatrice/src/filtertree.cpp

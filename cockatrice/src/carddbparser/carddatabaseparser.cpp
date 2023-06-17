@@ -8,8 +8,6 @@ void ICardDatabaseParser::clearSetlist()
 }
 
 CardSetPtr ICardDatabaseParser::internalAddSet(const QString &setName,
-                                               const QString &longName,
-                                               const QString &setType,
                                                const QDate &releaseDate)
 {
     if (sets.contains(setName)) {
@@ -17,8 +15,6 @@ CardSetPtr ICardDatabaseParser::internalAddSet(const QString &setName,
     }
 
     CardSetPtr newSet = CardSet::newInstance(setName);
-    newSet->setLongName(longName);
-    newSet->setSetType(setType);
     newSet->setReleaseDate(releaseDate);
 
     sets.insert(setName, newSet);

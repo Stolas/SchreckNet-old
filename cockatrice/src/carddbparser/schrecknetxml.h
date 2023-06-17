@@ -11,7 +11,7 @@ class SchrecknetParser : public ICardDatabaseParser
     Q_INTERFACES(ICardDatabaseParser)
 public:
     SchrecknetParser() = default;
-    ~CockatriceXml3Parser() override = default;
+    ~SchrecknetParser() override = default;
     bool getCanParseFile(const QString &name, QIODevice &device) override;
     void parseFile(QIODevice &device) override;
     bool saveToFile(SetNameMap sets,
