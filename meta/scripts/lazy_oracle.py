@@ -71,6 +71,7 @@ def create_card(root, card):
         if card['type'] == 'crypt':
             properties.setAttribute('capacity', str(card['properties']['capacity']))
             properties.setAttribute('group', str(card['properties']['group']))
+            properties.setAttribute('title', str(card['properties']['title']))
         else:
             properties.setAttribute('pool', str(card['properties']['pool_cost']))
             properties.setAttribute('blood', str(card['properties']['blood_cost']))
@@ -167,14 +168,8 @@ def create_schrecknetxml(card_db):
     xml.appendChild(tokens)
     xml.appendChild(sets)
 
-<<<<<<< Updated upstream
     with open("schrecknet.xml", "wb") as fd:
         fd.write(root.toprettyxml(indent ="\t", encoding="utf-16"))
-=======
-    with open("schrecknet.xml", "w") as fd:
-        # import ipdb; ipdb.set_trace()
-        fd.write(root.toprettyxml(indent ="\t"))
->>>>>>> Stashed changes
 
 def add_card(card_id, card_type, name, picture_url, text, properties):
     # Todo; extra parsing of the card text here.
@@ -196,6 +191,7 @@ def load_json():
             properties["capacity"] = card["capacity"]
             properties["disciplines"] = card.get("disciplines", None)
             properties["group"] = card["group"]
+            properties["title"] = card.get("title", '')
         else:
             # Parse as Library Card
             card_type = "library"
@@ -209,6 +205,8 @@ def load_json():
         properties["clans"] = card.get("clans", [])
         properties["types"] = card.get("types", [])
         properties["sets"] = card["sets"];
+        if name == "Cock Robin":
+            import ipdb; ipdb.set_trace()
 
         all_cards.append(add_card(card_id, card_type, name, picture_url, text, properties))
     return all_cards
