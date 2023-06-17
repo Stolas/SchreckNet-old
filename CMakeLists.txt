@@ -6,7 +6,7 @@
 # like the installation path, compilation flags etc..
 
 # cmake 3.16 is required if using qt6
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.21)
 
 # Early detect ccache
 option(USE_CCACHE "Cache the build results with ccache" ON)
@@ -21,7 +21,7 @@ option(WITH_CLIENT "build cockatrice" ON)
 # Compile oracle
 option(WITH_ORACLE "build oracle" ON)
 # Compile dbconverter
-option(WITH_DBCONVERTER "build dbconverter" ON)
+option(WITH_DBCONVERTER "build dbconverter" OFF)
 # Compile tests
 option(TEST "build tests" OFF)
 # Create compile_commands.json

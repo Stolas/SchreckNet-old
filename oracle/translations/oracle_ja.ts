@@ -1,23 +1,52 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS version="2.1" language="ja">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ja">
+<context>
+    <name>BetaReleaseChannel</name>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="206"/>
+        <source>Beta Releases</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="232"/>
+        <source>No reply received from the release update server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="241"/>
+        <source>Invalid reply received from the release update server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="274"/>
+        <source>No reply received from the file update server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 <context>
     <name>IntroPage</name>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="192"/>
+        <location filename="../src/oraclewizard.cpp" line="159"/>
         <source>Introduction</source>
         <translation>はじめに</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="193"/>
         <source>This wizard will import the list of sets, cards, and tokens that will be used by Cockatrice.</source>
-        <translation>このウィザードでは、Cockatriceで使用されるカードやトークン、セットのリストをインポートします。</translation>
+        <translation type="vanished">このウィザードでは、Cockatriceで使用されるカードやトークン、セットのリストをインポートします。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="195"/>
+        <location filename="../src/oraclewizard.cpp" line="160"/>
+        <source>This wizard will import the list of sets, cards, and tokens that will be used by SchreckNet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/oraclewizard.cpp" line="162"/>
         <source>Interface language:</source>
         <translation>インターフェース言語:</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="196"/>
+        <location filename="../src/oraclewizard.cpp" line="163"/>
         <source>Version:</source>
         <translation>バージョン:</translation>
     </message>
@@ -25,229 +54,216 @@
 <context>
     <name>LoadSetsPage</name>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="251"/>
+        <location filename="../src/oraclewizard.cpp" line="218"/>
         <source>Source selection</source>
         <translation>ソース選択</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="252"/>
+        <location filename="../src/oraclewizard.cpp" line="219"/>
         <source>Please specify a compatible source for the list of sets and cards. You can specify a URL address that will be downloaded or use an existing file from your computer.</source>
         <translation>セットとカードのリストの互換性のあるソースを指定してください。ダウンロードするURLアドレスを指定するか、コンピューターから既存のファイルを使用できます。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="256"/>
+        <location filename="../src/oraclewizard.cpp" line="223"/>
         <source>Download URL:</source>
         <translation>ダウンロードURL:</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="257"/>
+        <location filename="../src/oraclewizard.cpp" line="224"/>
         <source>Local file:</source>
         <translation>ローカルファイル:</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="258"/>
+        <location filename="../src/oraclewizard.cpp" line="225"/>
         <source>Restore default URL</source>
         <translation>デフォルトのURLを復元</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="259"/>
+        <location filename="../src/oraclewizard.cpp" line="226"/>
         <source>Choose file...</source>
         <translation>ファイルを選択...</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="269"/>
+        <location filename="../src/oraclewizard.cpp" line="236"/>
         <source>Load sets file</source>
         <translation>カードセットファイルを開く</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="279"/>
+        <location filename="../src/oraclewizard.cpp" line="240"/>
         <source>Sets JSON file (%1)</source>
         <translation>カードセット JSON ファイル (%1)</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="309"/>
-        <location filename="../src/oraclewizard.cpp" line="328"/>
-        <location filename="../src/oraclewizard.cpp" line="333"/>
-        <location filename="../src/oraclewizard.cpp" line="402"/>
-        <location filename="../src/oraclewizard.cpp" line="526"/>
-        <location filename="../src/oraclewizard.cpp" line="547"/>
+        <location filename="../src/oraclewizard.cpp" line="265"/>
+        <location filename="../src/oraclewizard.cpp" line="284"/>
+        <location filename="../src/oraclewizard.cpp" line="289"/>
+        <location filename="../src/oraclewizard.cpp" line="359"/>
+        <location filename="../src/oraclewizard.cpp" line="419"/>
         <source>Error</source>
         <translation>エラー</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="309"/>
+        <location filename="../src/oraclewizard.cpp" line="265"/>
         <source>The provided URL is not valid.</source>
         <translation>指定されたURLは無効です。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="313"/>
-        <source>Downloading (0MB)</source>
-        <translation>ダウンロード中 (0MB)</translation>
+        <location filename="../src/oraclewizard.cpp" line="269"/>
+        <source>Downloading (0MiB)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="328"/>
+        <location filename="../src/oraclewizard.cpp" line="350"/>
+        <source>Downloading (%1MiB)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/oraclewizard.cpp" line="420"/>
+        <source>The file was retrieved successfully, but it does not contain any card data.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading (0MB)</source>
+        <translation type="vanished">ダウンロード中 (0MB)</translation>
+    </message>
+    <message>
+        <location filename="../src/oraclewizard.cpp" line="284"/>
         <source>Please choose a file.</source>
         <translation>ファイルを選択してください。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="333"/>
+        <location filename="../src/oraclewizard.cpp" line="289"/>
         <source>Cannot open file &apos;%1&apos;.</source>
         <translation>&apos;%1&apos;を開けませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="393"/>
         <source>Downloading (%1MB)</source>
-        <translation>ダウンロード中 (%1MB)</translation>
+        <translation type="vanished">ダウンロード中 (%1MB)</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="402"/>
+        <location filename="../src/oraclewizard.cpp" line="359"/>
         <source>Network error: %1.</source>
         <translation>ネットワークエラー: %1。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="440"/>
+        <location filename="../src/oraclewizard.cpp" line="397"/>
         <source>Parsing file</source>
         <translation>ファイルの解析</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="454"/>
         <source>Xz extraction failed.</source>
-        <translation>Xz展開に失敗。</translation>
+        <translation type="vanished">Xz展開に失敗。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="462"/>
         <source>Sorry, this version of Oracle does not support xz compressed files.</source>
-        <translation>このバージョンのOracleはxz圧縮ファイルをサポートしていません。</translation>
+        <translation type="vanished">このバージョンのOracleはxz圧縮ファイルをサポートしていません。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="481"/>
         <source>Failed to open Zip archive: %1.</source>
-        <translation>ZIPアーカイブの展開に失敗: %1。</translation>
+        <translation type="vanished">ZIPアーカイブの展開に失敗: %1。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="486"/>
         <source>Zip extraction failed: the Zip archive doesn&apos;t contain exactly one file.</source>
-        <translation>ZIP展開に失敗:Zipアーカイブに含まれるファイルが1つだけではありません。</translation>
+        <translation type="vanished">ZIP展開に失敗:Zipアーカイブに含まれるファイルが1つだけではありません。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="494"/>
         <source>Zip extraction failed: %1.</source>
-        <translation>ZIP展開に失敗: %1。</translation>
+        <translation type="vanished">ZIP展開に失敗: %1。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="503"/>
         <source>Sorry, this version of Oracle does not support zipped files.</source>
-        <translation>申し訳ありませんが現バージョンのOracleはzip形式のファイルをサポートしていません。</translation>
+        <translation type="vanished">申し訳ありませんが現バージョンのOracleはzip形式のファイルをサポートしていません。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="526"/>
         <source>Do you want to download the uncompressed file instead?</source>
-        <translation>代わりに非圧縮ファイルをダウンロードしますか？</translation>
+        <translation type="vanished">代わりに非圧縮ファイルをダウンロードしますか？</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="548"/>
         <source>The file was retrieved successfully, but it does not contain any sets data.</source>
-        <translation>ファイルは正常に取得されましたが、カードセットのデータが含まれていませんでした。</translation>
+        <translation type="vanished">ファイルは正常に取得されましたが、カードセットのデータが含まれていませんでした。</translation>
     </message>
 </context>
 <context>
     <name>LoadSpoilersPage</name>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="699"/>
         <source>Save spoiler database</source>
-        <translation>スポイラーデータベースを保存</translation>
+        <translation type="vanished">スポイラーデータベースを保存</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="704"/>
         <source>XML; spoiler database (*.xml)</source>
-        <translation>XML; スポイラーデータベース (*.xml)</translation>
+        <translation type="vanished">XML; スポイラーデータベース (*.xml)</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="709"/>
         <source>Spoilers import</source>
-        <translation>スポイラーインポート</translation>
+        <translation type="vanished">スポイラーインポート</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="710"/>
         <source>Please specify a compatible source for spoiler data.</source>
-        <translation>互換性のあるスポイラーデータのソースを指定してください。</translation>
+        <translation type="vanished">互換性のあるスポイラーデータのソースを指定してください。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="712"/>
         <source>Download URL:</source>
-        <translation>ダウンロードURL:</translation>
+        <translation type="vanished">ダウンロードURL:</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="713"/>
         <source>Restore default URL</source>
-        <translation>デフォルトのURLを復元</translation>
+        <translation type="vanished">デフォルトのURLを復元</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="714"/>
         <source>The spoiler database will be saved at the following location:</source>
-        <translation>スポイラーデータベースは、以下の場所に保存されます:</translation>
+        <translation type="vanished">スポイラーデータベースは、以下の場所に保存されます:</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="716"/>
         <source>Save to a custom path (not recommended)</source>
-        <translation>別のパスに保存（非推奨）</translation>
+        <translation type="vanished">別のパスに保存（非推奨）</translation>
     </message>
 </context>
 <context>
     <name>LoadTokensPage</name>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="662"/>
         <source>Save token database</source>
-        <translation>トークンデータベースを保存</translation>
+        <translation type="vanished">トークンデータベースを保存</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="667"/>
         <source>XML; token database (*.xml)</source>
-        <translation>XML; トークンデータベース (*.xml)</translation>
+        <translation type="vanished">XML; トークンデータベース (*.xml)</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="672"/>
         <source>Tokens import</source>
-        <translation>トークンのインポート</translation>
+        <translation type="vanished">トークンのインポート</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="673"/>
         <source>Please specify a compatible source for token data.</source>
-        <translation>トークンデータのソースを選択してください。</translation>
+        <translation type="vanished">トークンデータのソースを選択してください。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="675"/>
         <source>Download URL:</source>
-        <translation>ダウンロードURL:</translation>
+        <translation type="vanished">ダウンロードURL:</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="676"/>
         <source>Restore default URL</source>
-        <translation>デフォルトのURLを復元</translation>
+        <translation type="vanished">デフォルトのURLを復元</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="677"/>
         <source>The token database will be saved at the following location:</source>
-        <translation>トークンデータベースは以下の場所に保存されます。</translation>
+        <translation type="vanished">トークンデータベースは以下の場所に保存されます。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="679"/>
         <source>Save to a custom path (not recommended)</source>
-        <translation>別のパスに保存（非推奨）</translation>
+        <translation type="vanished">別のパスに保存（非推奨）</translation>
     </message>
 </context>
 <context>
     <name>OracleImporter</name>
     <message>
-        <location filename="../src/oracleimporter.cpp" line="475"/>
         <source>Dummy set containing tokens</source>
-        <translation>ダミーセットを含むトークン</translation>
+        <translation type="vanished">ダミーセットを含むトークン</translation>
     </message>
 </context>
 <context>
     <name>OracleWizard</name>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="98"/>
+        <location filename="../src/oraclewizard.cpp" line="74"/>
         <source>Oracle Importer</source>
         <translation>Oracle Importer - オラクル・インポーター</translation>
     </message>
@@ -255,93 +271,129 @@
 <context>
     <name>OutroPage</name>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="201"/>
+        <location filename="../src/oraclewizard.cpp" line="168"/>
         <source>Finished</source>
         <translation>完了しました！</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="202"/>
+        <location filename="../src/oraclewizard.cpp" line="169"/>
         <source>The wizard has finished.</source>
         <translation>ウィザードが完了しました。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="203"/>
-        <source>You can now start using Cockatrice with the newly updated cards.</source>
-        <translation>Cockatriceで新しく更新されたカードを使うことが出来ます。</translation>
+        <location filename="../src/oraclewizard.cpp" line="170"/>
+        <source>You can now start using SchreckNet with the newly updated cards.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="204"/>
+        <location filename="../src/oraclewizard.cpp" line="171"/>
+        <source>If the card databases don&apos;t reload automatically, restart the SchreckNet client.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You can now start using Cockatrice with the newly updated cards.</source>
+        <translation type="vanished">Cockatriceで新しく更新されたカードを使うことが出来ます。</translation>
+    </message>
+    <message>
         <source>If the card databases don&apos;t reload automatically, restart the Cockatrice client.</source>
-        <translation>カードデータベースが自動的に再読込されない場合は、Cockatriceを再起動して下さい。</translation>
+        <translation type="vanished">カードデータベースが自動的に再読込されない場合は、Cockatriceを再起動して下さい。</translation>
+    </message>
+</context>
+<context>
+    <name>PictureLoader</name>
+    <message>
+        <location filename="../../cockatrice/src/pictureloader.cpp" line="346"/>
+        <source>en</source>
+        <comment>code for scryfall&apos;s language property, not available for all languages</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>SaveSetsPage</name>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="585"/>
-        <location filename="../src/oraclewizard.cpp" line="638"/>
+        <location filename="../src/oraclewizard.cpp" line="457"/>
+        <location filename="../src/oraclewizard.cpp" line="510"/>
         <source>Error</source>
         <translation>エラー</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="585"/>
+        <location filename="../src/oraclewizard.cpp" line="457"/>
         <source>No set has been imported.</source>
         <translation>セットはインポートされませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="591"/>
+        <location filename="../src/oraclewizard.cpp" line="463"/>
         <source>Sets imported</source>
         <translation>カードセットインポート</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="592"/>
+        <location filename="../src/oraclewizard.cpp" line="464"/>
         <source>The following sets have been found:</source>
         <translation>次のセットが見つかりました:</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="594"/>
         <source>Press &quot;Save&quot; to store the imported cards in the Cockatrice database.</source>
-        <translation>”保存”をクリックするとインポートしたカードをCockatriceデータベースに保存します。</translation>
+        <translation type="vanished">”保存”をクリックするとインポートしたカードをCockatriceデータベースに保存します。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="595"/>
+        <location filename="../src/oraclewizard.cpp" line="466"/>
+        <source>Press &quot;Save&quot; to store the imported cards in the SchreckNet database.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/oraclewizard.cpp" line="467"/>
         <source>The card database will be saved at the following location:</source>
         <translation>カードデータベースは以下の場所に保存されます:</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="597"/>
+        <location filename="../src/oraclewizard.cpp" line="469"/>
         <source>Save to a custom path (not recommended)</source>
         <translation>別のパスに保存（非推奨）</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="599"/>
+        <location filename="../src/oraclewizard.cpp" line="471"/>
         <source>&amp;Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="605"/>
+        <location filename="../src/oraclewizard.cpp" line="477"/>
         <source>Import finished: %1 cards.</source>
         <translation>%1枚のカードがインポートされました。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="608"/>
+        <location filename="../src/oraclewizard.cpp" line="480"/>
         <source>%1: %2 cards imported</source>
         <translation>%1: %2枚のカードがインポートされました。</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="617"/>
+        <location filename="../src/oraclewizard.cpp" line="489"/>
         <source>Save card database</source>
         <translation>カードデータベースを保存</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="618"/>
+        <location filename="../src/oraclewizard.cpp" line="490"/>
         <source>XML; card database (*.xml)</source>
         <translation>XML; card database (*.xml)</translation>
     </message>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="638"/>
+        <location filename="../src/oraclewizard.cpp" line="510"/>
         <source>The file could not be saved to %1</source>
         <translation>%1に保存できませんでした。</translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutsSettings</name>
+    <message>
+        <location filename="../../cockatrice/src/shortcutssettings.cpp" line="46"/>
+        <source>Your configuration file contained invalid shortcuts.
+Please check your shortcut settings!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../cockatrice/src/shortcutssettings.cpp" line="48"/>
+        <source>The following shortcuts have been set to default:
+</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -380,9 +432,38 @@
     </message>
 </context>
 <context>
+    <name>StableReleaseChannel</name>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="92"/>
+        <source>Stable Releases</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="108"/>
+        <source>No reply received from the release update server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="116"/>
+        <source>Invalid reply received from the release update server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="172"/>
+        <source>No reply received from the tag update server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../cockatrice/src/releasechannel.cpp" line="179"/>
+        <source>Invalid reply received from the tag update server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>i18n</name>
     <message>
-        <location filename="../src/oraclewizard.cpp" line="58"/>
+        <location filename="../src/oraclewizard.cpp" line="36"/>
+        <location filename="../../cockatrice/src/settingscache.cpp" line="157"/>
         <source>English</source>
         <translation>日本語 (Japanese)</translation>
     </message>
@@ -390,7 +471,7 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="42"/>
+        <location filename="../src/main.cpp" line="60"/>
         <source>Only run in spoiler mode</source>
         <translation>スポイラーモードでのみ起動</translation>
     </message>

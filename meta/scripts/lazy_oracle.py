@@ -167,8 +167,14 @@ def create_schrecknetxml(card_db):
     xml.appendChild(tokens)
     xml.appendChild(sets)
 
+<<<<<<< Updated upstream
     with open("schrecknet.xml", "wb") as fd:
         fd.write(root.toprettyxml(indent ="\t", encoding="utf-16"))
+=======
+    with open("schrecknet.xml", "w") as fd:
+        # import ipdb; ipdb.set_trace()
+        fd.write(root.toprettyxml(indent ="\t"))
+>>>>>>> Stashed changes
 
 def add_card(card_id, card_type, name, picture_url, text, properties):
     # Todo; extra parsing of the card text here.

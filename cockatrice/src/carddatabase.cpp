@@ -2,7 +2,7 @@
 
 #include "carddbparser/cockatricexml3.h"
 #include "carddbparser/cockatricexml4.h"
-#include "carddbparser/schrecknetxml.h"
+// #include "carddbparser/schrecknetxml.h"
 #include "game_specific_terms.h"
 #include "pictureloader.h"
 #include "settingscache.h"
