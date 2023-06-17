@@ -42,7 +42,6 @@ CardInfoPtr OracleImporter::addCard(QString name,
                                     QString text,
                                     bool isToken,
                                     QVariantHash properties,
-                                    QList<CardRelation *> &relatedCards,
                                     CardInfoPerSet setInfo)
 {
     // Workaround for card name weirdness
@@ -112,8 +111,8 @@ CardInfoPtr OracleImporter::addCard(QString name,
     QList<CardRelation *> reverseRelatedCards;
     CardInfoPerSetMap setsInfo;
     setsInfo.insert(setInfo.getPtr()->getShortName(), setInfo);
-    CardInfoPtr newCard = CardInfo::newInstance(name, text, isToken, properties, relatedCards, reverseRelatedCards,
-                                                setsInfo, cipt, tableRow, upsideDown);
+    CardInfoPtr newCard = CardInfo::newInstance(name, text, isToken, properties,
+                                                setsInfo, tableRow);
 
     if (name.isEmpty()) {
         qDebug() << "warning: an empty card was added to set" << setInfo.getPtr()->getShortName();
@@ -188,7 +187,7 @@ int OracleImporter::startImport()
         QList<CardRelation *> relatedCards;
         CardInfoPerSet setInfo;
 
-        CardInfoPtr newCard = addCard(name, text, false, properties, relatedCards, setInfo);
+        CardInfoPtr newCard = addCard(name, text, false, properties, setInfo);
         numCards++;
     }
 
@@ -204,7 +203,7 @@ int OracleImporter::startImport()
 
 bool OracleImporter::saveToFile(const QString &fileName, const QString &sourceUrl, const QString &sourceVersion)
 {
-    SchreckNetXmlParser parser;
+    SchrecknetParser parser;
     return parser.saveToFile(sets, cards, fileName, sourceUrl, sourceVersion);
 }
 

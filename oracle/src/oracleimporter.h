@@ -22,7 +22,6 @@ private:
                         QString text,
                         bool isToken,
                         QVariantHash properties,
-                        QList<CardRelation *> &relatedCards,
                         CardInfoPerSet setInfo);
 signals:
     void setIndexChanged(int cardsImported, int setIndex, const QString &setName);
