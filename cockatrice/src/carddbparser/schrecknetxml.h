@@ -21,8 +21,11 @@ public:
                     const QString &sourceVersion = "unknown") override;
 
 private:
-    void loadCardsFromXml(QXmlStreamReader &xml);
+    void loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt);
+    void loadCryptCardsFromXml(QXmlStreamReader &xml);
+    void loadLibraryCardsFromXml(QXmlStreamReader &xml);
     void loadSetsFromXml(QXmlStreamReader &xml);
+    void loadTokensFromXml(QXmlStreamReader &xml);
     QString getMainCardType(QString &type);
 signals:
     void addCard(CardInfoPtr card) override;

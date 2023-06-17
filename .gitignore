@@ -12,3 +12,4 @@ compile_commands.json
 .vs/
 .vscode/
 common/pb/*
+*.sw*

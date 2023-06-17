@@ -6,9 +6,9 @@
 #include <QXmlStreamReader>
 #include <version_string.h>
 
-#define SCHRECKNET_TAGNAME "schrecknetxml"
-#define COCKATRICE_XML3_TAGVER 3
-#define COCKATRICE_XML3_SCHEMALOCATION                                                                                 \
+#define SCHRECKNET_XML_TAGNAME "schrecknetxml"
+#define SCHRECKNET_XML_TAGVER 1
+#define SCHRECKNET_XML_SCHEMALOCATION                                                                                 \
     "https://raw.githubusercontent.com/Cockatrice/Cockatrice/master/doc/carddatabase_v3/cards.xsd"
 
 bool SchrecknetParser::getCanParseFile(const QString &fileName, QIODevice &device)
@@ -23,9 +23,9 @@ bool SchrecknetParser::getCanParseFile(const QString &fileName, QIODevice &devic
     QXmlStreamReader xml(&device);
     while (!xml.atEnd()) {
         if (xml.readNext() == QXmlStreamReader::StartElement) {
-            if (xml.name().toString() == COCKATRICE_XML3_TAGNAME) {
+            if (xml.name().toString() == SCHRECKNET_XML_TAGNAME) {
                 int version = xml.attributes().value("version").toString().toInt();
-                if (version == COCKATRICE_XML3_TAGVER) {
+                if (version == SCHRECKNET_XML_TAGVER) {
                     return true;
                 } else {
                     qDebug() << "[SchrecknetParser] Parsing failed: wrong version" << version;
@@ -55,8 +55,12 @@ void SchrecknetParser::parseFile(QIODevice &device)
                 auto name = xml.name().toString();
                 if (name == "sets") {
                     loadSetsFromXml(xml);
-                } else if (name == "cards") {
-                    loadCardsFromXml(xml);
+                } else if (name == "crypt_cards") {
+                    loadCryptCardsFromXml(xml);
+                } else if (name == "library_cards") {
+                    loadLibraryCardsFromXml(xml);
+                } else if (name == "tokens") {
+                    loadTokensCardsFromXml(xml);
                 } else if (!name.isEmpty()) {
                     qDebug() << "[SchrecknetParser] Unknown item" << name << ", trying to continue anyway";
                     xml.skipCurrentElement();
@@ -75,36 +79,21 @@ void SchrecknetParser::loadSetsFromXml(QXmlStreamReader &xml)
 
         auto name = xml.name().toString();
         if (name == "set") {
-            QString shortName, longName, setType;
+            auto attributes = xml.attributes();
+            QString name;
             QDate releaseDate;
-            while (!xml.atEnd()) {
-                if (xml.readNext() == QXmlStreamReader::EndElement) {
-                    break;
-                }
-                name = xml.name().toString();
 
-                if (name == "name") {
-                    shortName = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                } else if (name == "longname") {
-                    longName = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                } else if (name == "settype") {
-                    setType = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                } else if (name == "releasedate") {
-                    releaseDate =
-                        QDate::fromString(xml.readElementText(QXmlStreamReader::IncludeChildElements), Qt::ISODate);
-                } else if (!name.isEmpty()) {
-                    qDebug() << "[SchrecknetParser] Unknown set property" << name << ", trying to continue anyway";
-                    xml.skipCurrentElement();
-                }
-            }
+            name = attributes.value("name");
+            release_date = QDate::fromString(attributes.value("release_date"), Qt::ISODate);
 
-            internalAddSet(shortName, longName, setType, releaseDate);
+            internalAddSet(name, releaseDate); // Todo; find and refactor internalAddSet
         }
     }
 }
 
 QString SchrecknetParser::getMainCardType(QString &type)
 {
+    qDebug() << "[SchreckNetLoader] The get MainCardType is still mtg style, got type: " << type;
     QString result = type;
     /*
     Legendary Artifact Creature - Golem
@@ -141,7 +130,7 @@ QString SchrecknetParser::getMainCardType(QString &type)
     return result;
 }
 
-void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml)
+void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
 {
     while (!xml.atEnd()) {
         if (xml.readNext() == QXmlStreamReader::EndElement) {
@@ -150,16 +139,17 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml)
 
         auto xmlName = xml.name().toString();
         if (xmlName == "card") {
+            QString id = QString("");
             QString name = QString("");
             QString text = QString("");
             QVariantHash properties = QVariantHash();
-            QString colors = QString("");
-            QList<CardRelation *> relatedCards, reverseRelatedCards;
             CardInfoPerSetMap sets = CardInfoPerSetMap();
-            int tableRow = 0;
-            bool cipt = false;
-            bool isToken = false;
-            bool upsideDown = false;
+            int tableRow = 0; // Todo; Determine which is good for Crypt and which is good for lib
+
+            auto attrs = xml.attributes();
+            id = attrs.value("id").toString();
+            name = attributes.value("name").toString();
+            name = attributes.value("picture").toString();
 
             while (!xml.atEnd()) {
                 if (xml.readNext() == QXmlStreamReader::EndElement) {
@@ -168,110 +158,58 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml)
                 xmlName = xml.name().toString();
 
                 // variable - assigned properties
-                if (xmlName == "name") {
-                    name = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                } else if (xmlName == "text") {
+                if (xmlName == "text") {
                     text = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                } else if (xmlName == "color") {
-                    colors.append(xml.readElementText(QXmlStreamReader::IncludeChildElements));
-                } else if (xmlName == "token") {
-                    isToken = static_cast<bool>(xml.readElementText(QXmlStreamReader::IncludeChildElements).toInt());
-                    // generic properties
-                } else if (xmlName == "manacost") {
-                    properties.insert("manacost", xml.readElementText(QXmlStreamReader::IncludeChildElements));
-                } else if (xmlName == "cmc") {
-                    properties.insert("cmc", xml.readElementText(QXmlStreamReader::IncludeChildElements));
-                } else if (xmlName == "type") {
-                    QString type = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                    properties.insert("type", type);
-                    properties.insert("maintype", getMainCardType(type));
-                } else if (xmlName == "pt") {
-                    properties.insert("pt", xml.readElementText(QXmlStreamReader::IncludeChildElements));
-                } else if (xmlName == "loyalty") {
-                    properties.insert("loyalty", xml.readElementText(QXmlStreamReader::IncludeChildElements));
-                    // positioning info
-                } else if (xmlName == "tablerow") {
-                    tableRow = xml.readElementText(QXmlStreamReader::IncludeChildElements).toInt();
-                } else if (xmlName == "cipt") {
-                    cipt = (xml.readElementText(QXmlStreamReader::IncludeChildElements) == "1");
-                } else if (xmlName == "upsidedown") {
-                    upsideDown = (xml.readElementText(QXmlStreamReader::IncludeChildElements) == "1");
-                    // sets
-                } else if (xmlName == "set") {
-                    // NOTE: attributes must be read before readElementText()
-                    QXmlStreamAttributes attrs = xml.attributes();
-                    QString setName = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                    CardInfoPerSet setInfo(internalAddSet(setName));
-                    if (attrs.hasAttribute("muId")) {
-                        setInfo.setProperty("muid", attrs.value("muId").toString());
-                    }
+                } else if (xmlName == "properties") {
+                    attrs = xml.attributes();
 
-                    if (attrs.hasAttribute("muId")) {
-                        setInfo.setProperty("uuid", attrs.value("uuId").toString());
-                    }
-
-                    if (attrs.hasAttribute("picURL")) {
-                        setInfo.setProperty("picurl", attrs.value("picURL").toString());
-                    }
-
-                    if (attrs.hasAttribute("num")) {
-                        setInfo.setProperty("num", attrs.value("num").toString());
-                    }
-
-                    if (attrs.hasAttribute("rarity")) {
-                        setInfo.setProperty("rarity", attrs.value("rarity").toString());
-                    }
-                    sets.insert(setName, setInfo);
-                    // related cards
-                } else if (xmlName == "related" || xmlName == "reverse-related") {
-                    bool attach = false;
-                    bool exclude = false;
-                    bool variable = false;
-                    int count = 1;
-                    QXmlStreamAttributes attrs = xml.attributes();
-                    QString cardName = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                    if (attrs.hasAttribute("count")) {
-                        if (attrs.value("count").toString().indexOf("x=") == 0) {
-                            variable = true;
-                            count = attrs.value("count").toString().remove(0, 2).toInt();
-                        } else if (attrs.value("count").toString().indexOf("x") == 0) {
-                            variable = true;
-                        } else {
-                            count = attrs.value("count").toString().toInt();
-                        }
-
-                        if (count < 1) {
-                            count = 1;
-                        }
-                    }
-
-                    if (attrs.hasAttribute("attach")) {
-                        attach = true;
-                    }
-
-                    if (attrs.hasAttribute("exclude")) {
-                        exclude = true;
-                    }
-
-                    auto *relation = new CardRelation(cardName, attach, exclude, variable, count);
-                    if (xmlName == "reverse-related") {
-                        reverseRelatedCards << relation;
+                    if (isCrypt) {
+                        capacity = attrs.value("capacity").toInt()
+                        group = attrs.value("group").toInt()
                     } else {
-                        relatedCards << relation;
+                        auto pool = attrs.value("pool").toString()
+                        auto blood = attrs.value("blood").toString()
                     }
-                } else if (!xmlName.isEmpty()) {
-                    qDebug() << "[SchrecknetParser] Unknown card property" << xmlName
-                             << ", trying to continue anyway";
-                    xml.skipCurrentElement();
-                }
-            }
 
-            properties.insert("colors", colors);
-            CardInfoPtr newCard = CardInfo::newInstance(name, text, isToken, properties, relatedCards,
-                                                        reverseRelatedCards, sets, cipt, tableRow, upsideDown);
+                    while (!xml.atEnd()) {
+                        if (xml.readNext() == QXmlStreamReader::EndElement) {
+                            break;
+                        }
+                        xmlName = xml.name().toString();
+
+                        if (xmlName == "types") {
+                            QString type = xml.readElementText(QXmlStreamReader::IncludeChildElements);
+                            properties.insert("type", type);
+                            properties.insert("maintype", getMainCardType(type));
+                        } else if (xmlName == "clans") {
+                        } else if (xmlName == "disciplines") {
+                            if (!isCrypt) {
+                                qDebug() << "[SchrecknetParser] Library card has " << xmlName
+                                         << ", trying to continue anyway";
+                                xml.skipCurrentElement();
+                            }
+                        } else if (xmlName == "sets") {
+                            QString setName = "Final Nights";
+                            CardInfoPerSet setInfo(internalAddSet(setName));
+                            sets.insert(setName, setInfo);
+                        } else if (!xmlName.isEmpty()) {
+                            qDebug() << "[SchrecknetParser] Unknown card property" << xmlName
+                                     << ", trying to continue anyway";
+                        }
+                    }
+                }
+            CardInfoPtr newCard = CardInfo::newInstance(name, text, false, properties, sets, tableRow, true);
             emit addCard(newCard);
         }
     }
+}
+
+void SchrecknetParser::loadCryptCardsFromXml(QXmlStreamReader &xml)
+    return loadCryptCardsFromXml(xml, true);
+}
+
+void SchrecknetParser::loadLibraryCardsFromXml(QXmlStreamReader &xml)
+    return loadCryptCardsFromXml(xml, false);
 }
 
 static QXmlStreamWriter &operator<<(QXmlStreamWriter &xml, const CardSetPtr &set)
@@ -427,10 +365,10 @@ bool SchrecknetParser::saveToFile(SetNameMap sets,
 
     xml.setAutoFormatting(true);
     xml.writeStartDocument();
-    xml.writeStartElement(COCKATRICE_XML3_TAGNAME);
-    xml.writeAttribute("version", QString::number(COCKATRICE_XML3_TAGVER));
+    xml.writeStartElement(SCHRECKNET_XML_TAGNAME);
+    xml.writeAttribute("version", QString::number(SCHRECKNET_XML_TAGVER));
     xml.writeAttribute("xmlns:xsi", COCKATRICE_XML_XSI_NAMESPACE);
-    xml.writeAttribute("xsi:schemaLocation", COCKATRICE_XML3_SCHEMALOCATION);
+    xml.writeAttribute("xsi:schemaLocation", SCHRECKNET_XML_SCHEMALOCATION);
 
     xml.writeStartElement("info");
     xml.writeTextElement("author", QCoreApplication::applicationName() + QString(" %1").arg(VERSION_STRING));
