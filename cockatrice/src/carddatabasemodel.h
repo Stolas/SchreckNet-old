@@ -22,7 +22,10 @@ public:
         DisclipesColumn,
         CapacityColumn,
         ClanColumn,
-        GroupColumn
+        GroupColumn,
+        TypeColumn,
+        PoolColumn,
+        BloodColumn
     };
     enum Role
     {

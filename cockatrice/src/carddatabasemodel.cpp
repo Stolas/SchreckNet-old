@@ -4,7 +4,7 @@
 
 #include <QMap>
 
-#define CARDDBMODEL_COLUMNS 6
+#define CARDDBMODEL_COLUMNS 8
 
 CardDatabaseModel::CardDatabaseModel(CardDatabase *_db, bool _showOnlyCardsFromEnabledSets, QObject *parent)
     : QAbstractListModel(parent), db(_db), showOnlyCardsFromEnabledSets(_showOnlyCardsFromEnabledSets)
@@ -43,21 +43,20 @@ QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
     switch (index.column()) {
         case NameColumn:
             return card->getName();
+        case TypeColumn:
+            return "woop";
         case DisclipesColumn:
+            return card->getDisciplines();
         case CapacityColumn:
+            return card->getCapacity();
         case ClanColumn:
+            return card->getClans().join(", ");
         case GroupColumn:
-        // case SetListColumn:
-        //     return card->getSetsNames();
-        // case ManaCostColumn:
-        //     return role == SortRole ? QString("%1%2").arg(card->getCmc(), 4, QChar('0')).arg(card->getManaCost())
-        //                             : card->getManaCost();
-        // case CardTypeColumn:
-        //     return card->getCardType();
-        // case PTColumn:
-        //     return card->getPowTough();
-        // case ColorColumn:
-        //     return card->getColors();
+            return card->getGroup();
+        case PoolColumn:
+            return card->getPool();
+        case BloodColumn:
+            return card->getBlood();
         default:
             return QVariant();
     }
@@ -72,6 +71,8 @@ QVariant CardDatabaseModel::headerData(int section, Qt::Orientation orientation,
     switch (section) {
         case NameColumn:
             return QString(tr("Name"));
+        case TypeColumn:
+            return QString(tr("Type"));
         case DisclipesColumn:
             return QString(tr("Disclipes"));
         case CapacityColumn:
@@ -80,6 +81,10 @@ QVariant CardDatabaseModel::headerData(int section, Qt::Orientation orientation,
             return QString(tr("Clan"));
         case GroupColumn:
             return QString(tr("Group"));
+        case PoolColumn:
+            return QString(tr("Pool"));
+        case BloodColumn:
+            return QString(tr("Blood"));
         default:
             return QVariant();
     }
@@ -128,7 +133,7 @@ void CardDatabaseModel::cardAdded(CardInfoPtr card)
     if (checkCardHasAtLeastOneEnabledSet(card) || true) {
         // add the card if it's present in at least one enabled set
         beginInsertRows(QModelIndex(), cardList.size(), cardList.size());
-        qDebug() << card;
+        //qDebug() << card;
         cardList.append(card);
         connect(card.data(), SIGNAL(cardInfoChanged(CardInfoPtr)), this, SLOT(cardInfoChanged(CardInfoPtr)));
         endInsertRows();

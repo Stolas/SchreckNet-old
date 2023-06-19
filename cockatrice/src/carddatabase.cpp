@@ -624,10 +624,14 @@ bool CardDatabase::saveCustomTokensToFile()
     return true;
 }
 
-// Back-compatibility methods. Remove ASAP
+// Back-compatibility methods. Remove ASAP -> Nah I like these for schrecknet
 const QStringList CardInfo::getCardTypes() const
 {
     return getPropertyList(VTES::CardTypes);
+}
+const QStringList CardInfo::getDisciplines() const
+{
+    return getPropertyList(VTES::Disciplines);
 }
 void CardInfo::setCardTypes(const QStringList& values)
 {

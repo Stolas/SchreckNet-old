@@ -32,6 +32,7 @@ set(common_SOURCES
 )
 
 set(ORACLE_LIBS)
+# -- /Zc:__cplusplus /permissive-
 
 include_directories(pb)
 include_directories(sfmt)

@@ -52,7 +52,7 @@ void SchrecknetParser::parseFile(QIODevice &device)
                 }
 
                 auto name = xml.name().toString();
-                qDebug() << name;
+                //qDebug() << name;
                 if (name == "sets") {
                     loadSetsFromXml(xml);
                 } else if (name == "crypt_cards") {
@@ -134,13 +134,15 @@ QString SchrecknetParser::getMainCardType(QString &type)
 }
 
 void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
-    xml.readNext();
+    /* Todo; this is buggy. */
     while (!xml.atEnd()) {
         if (xml.readNext() == QXmlStreamReader::EndElement) {
             break;
         }
 
         auto xmlName = xml.name().toString();
+        if (xmlName == nullptr) { continue; }
+
         if (xmlName == "card") {
             QString id = QString("");
             QString name = QString("");
@@ -161,6 +163,9 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
                 }
                 // variable - assigned properties
                 xmlName = xml.name().toString();
+                if (xmlName == nullptr) { continue; }
+
+
                 if (xmlName == "text") {
                     text = xml.readElementText(QXmlStreamReader::IncludeChildElements);
                 } else if (xmlName == "tablerow") {
@@ -175,17 +180,31 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
                         properties.insert(VTES::BloodCost, attrs.value("blood").toString());
                     }
 
+                    /* Properties */
                     while (!xml.atEnd()) {
                         if (xml.readNext() == QXmlStreamReader::EndElement) {
                             break;
                         }
                         xmlName = xml.name().toString();
+                        if (xmlName == nullptr) { continue; }
 
                         if (xmlName == "types") {
                             QString type = xml.readElementText(QXmlStreamReader::IncludeChildElements);
                             properties.insert(VTES::CardTypes, type);
                         } else if (xmlName == "clans") {
-                            qDebug() << "Todo; load Clans";
+                            // Todo; Something like this. This is buggy as a stack value is stored in properties.
+                            // QStringList clanList;
+                            // while (!xml.atEnd()) {
+                            //     if (xml.readNext() == QXmlStreamReader::EndElement) {
+                            //         break;
+                            //     }
+                            //     xmlName = xml.name().toString();
+                            //     if (xmlName == "clan") {
+                            //         clanList.append(xml.readElementText(QXmlStreamReader::IncludeChildElements));
+                            //     }
+                            // }
+                            // qDebug() << "Todo; load Clans";
+                            // properties.insert(VTES::Clans, clanList);
                         } else if (xmlName == "disciplines") {
                             if (!isCrypt) {
                                 qDebug() << "[SchrecknetParser] Library card has " << xmlName
@@ -194,8 +213,6 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
                                 continue;
                             }
                             QString clans = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-                            qDebug() << "Todo; load Disciplines";
-                            //properties.insert(VTES::CardTypes, type);
 
                         } else if (xmlName == "sets") {
                             QString setName = "Final Nights";
@@ -205,9 +222,10 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
                             qDebug() << "[SchrecknetParser] Unknown card property" << xmlName
                                      << ", trying to continue anyway";
                         }
-                    }
+                    } /* End of Properties */
                 }
             }
+            //qDebug() << properties;
             CardInfoPtr newCard = CardInfo::newInstance(name, text, false, false, properties, sets, tableRow);
             emit addCard(newCard);
         }

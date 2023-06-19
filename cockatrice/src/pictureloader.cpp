@@ -204,10 +204,8 @@ bool PictureLoaderWorker::cardImageExistsOnDisk(QString &setName, QString &corre
         }
     }
 
-    if (!setName.isEmpty()) {
-        picsPaths << picsPath + "/" + setName + "/" + correctedCardname
-                  << picsPath + "/downloadedPics/" + setName + "/" + correctedCardname;
-    }
+	picsPaths << picsPath + "/" + correctedCardname
+			  << picsPath + "/downloadedPics/" + correctedCardname;
 
     // Iterates through the list of paths, searching for images with the desired
     // name with any QImageReader-supported
@@ -464,23 +462,19 @@ void PictureLoaderWorker::picDownloadFinished(QNetworkReply *reply)
     }
 
     if (imgReader.read(&testImage)) {
-        QString setName = cardBeingDownloaded.getSetName();
-        if (!setName.isEmpty()) {
-            if (!QDir().mkpath(picsPath + "/downloadedPics/" + setName)) {
-                qDebug() << "PictureLoader: [card: " << cardBeingDownloaded.getCard()->getName()
-                         << " set: " << cardBeingDownloaded.getSetName()
-                         << "]: " << picsPath + "/downloadedPics/" + setName + " could not be created.";
-                return;
-            }
-
-            QFile newPic(picsPath + "/downloadedPics/" + setName + "/" +
-                         cardBeingDownloaded.getCard()->getCorrectedName() + extension);
-            if (!newPic.open(QIODevice::WriteOnly)) {
-                return;
-            }
-            newPic.write(picData);
-            newPic.close();
+        if (!QDir().mkpath(picsPath + "/downloadedPics/")) {
+            qDebug() << "PictureLoader: [card: " << cardBeingDownloaded.getCard()->getName()
+                     << " set: " << cardBeingDownloaded.getSetName()
+                     << "]: " << picsPath + "/downloadedPics/ could not be created.";
+            return;
         }
+
+        QFile newPic(picsPath + "/downloadedPics/" + cardBeingDownloaded.getCard()->getCorrectedName() + extension);
+        if (!newPic.open(QIODevice::WriteOnly)) {
+            return;
+        }
+        newPic.write(picData);
+        newPic.close();
 
         imageLoaded(cardBeingDownloaded.getCard(), testImage);
         qDebug() << "PictureLoader: [card: " << cardBeingDownloaded.getCard()->getName()
@@ -490,6 +484,8 @@ void PictureLoaderWorker::picDownloadFinished(QNetworkReply *reply)
         qDebug() << "PictureLoader: [card: " << cardBeingDownloaded.getCard()->getName()
                  << " set: " << cardBeingDownloaded.getSetName() << "]: Possible picture at "
                  << reply->request().url().toDisplayString() << " could not be loaded";
+        QString errStr = imgReader.errorString();
+        qDebug() << errStr;
         picDownloadFailed();
     }
 

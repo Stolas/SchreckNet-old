@@ -109,19 +109,18 @@ PhasesToolbar::PhasesToolbar(QGraphicsItem *parent)
     connect(aDrawCard, SIGNAL(triggered()), this, SLOT(actDrawCard()));
 
     PhaseButton *untapButton = new PhaseButton("untap", this, aUntapAll);
-    PhaseButton *upkeepButton = new PhaseButton("upkeep", this);
-    PhaseButton *drawButton = new PhaseButton("draw", this, aDrawCard);
-    PhaseButton *main1Button = new PhaseButton("main1", this);
+    PhaseButton *masterButton = new PhaseButton("master", this);
+    PhaseButton *minionButton = new PhaseButton("minion", this);
     PhaseButton *combatStartButton = new PhaseButton("combat_start", this);
     PhaseButton *combatAttackersButton = new PhaseButton("combat_attackers", this);
     PhaseButton *combatBlockersButton = new PhaseButton("combat_blockers", this);
     PhaseButton *combatDamageButton = new PhaseButton("combat_damage", this);
     PhaseButton *combatEndButton = new PhaseButton("combat_end", this);
-    PhaseButton *main2Button = new PhaseButton("main2", this);
-    PhaseButton *cleanupButton = new PhaseButton("cleanup", this);
+    PhaseButton *influenceButton = new PhaseButton("influence", this);
+    PhaseButton *discardButton = new PhaseButton("discard", this);
 
-    buttonList << untapButton << upkeepButton << drawButton << main1Button << combatStartButton << combatAttackersButton
-               << combatBlockersButton << combatDamageButton << combatEndButton << main2Button << cleanupButton;
+    buttonList << untapButton << masterButton << minionButton << combatStartButton << combatAttackersButton
+               << combatBlockersButton << combatDamageButton << combatEndButton << influenceButton << discardButton;
 
     for (auto &i : buttonList)
         connect(i, SIGNAL(clicked()), this, SLOT(phaseButtonClicked()));
@@ -149,27 +148,25 @@ QString PhasesToolbar::getLongPhaseName(int phase) const
 {
     switch (phase) {
         case 0:
-            return tr("Untap step");
+            return tr("Untap phase");
         case 1:
-            return tr("Upkeep step");
+            return tr("Master phase");
         case 2:
-            return tr("Draw step");
+            return tr("Minion phase");
         case 3:
-            return tr("First main phase");
-        case 4:
             return tr("Beginning of combat step");
-        case 5:
+        case 4:
             return tr("Declare attackers step");
-        case 6:
+        case 5:
             return tr("Declare blockers step");
-        case 7:
+        case 6:
             return tr("Combat damage step");
-        case 8:
+        case 7:
             return tr("End of combat step");
+        case 8:
+            return tr("Influence phase");
         case 9:
-            return tr("Second main phase");
-        case 10:
-            return tr("End of turn step");
+            return tr("Discard phase");
         default:
             return QString();
     }
@@ -191,6 +188,7 @@ void PhasesToolbar::rearrangeButtons()
     double y = marginSize;
     buttonList[0]->setPos(marginSize, y);
     buttonList[1]->setPos(marginSize, y += symbolSize);
+    y += ySpacing;
     buttonList[2]->setPos(marginSize, y += symbolSize);
     y += ySpacing;
     buttonList[3]->setPos(marginSize, y += symbolSize);
@@ -202,8 +200,6 @@ void PhasesToolbar::rearrangeButtons()
     buttonList[8]->setPos(marginSize, y += symbolSize);
     y += ySpacing;
     buttonList[9]->setPos(marginSize, y += symbolSize);
-    y += ySpacing;
-    buttonList[10]->setPos(marginSize, y += symbolSize);
     y += ySpacing;
     y += ySpacing;
     nextTurnButton->setPos(marginSize, y + symbolSize);

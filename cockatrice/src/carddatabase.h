@@ -296,18 +296,20 @@ public:
     }
 
     // Back-compatibility methods. Remove ASAP
-    const QList<QString> getCardTypes() const;
+    const QStringList getCardTypes() const;
     void setCardTypes(const QStringList &values);
+    const QStringList getDisciplines() const;
     const QString getCapacity() const;
     const QString getPool() const;
     const QString getBlood() const;
     const QString getMainCardType() const;
-    const QList<QString> getClans() const;
+    const QStringList getClans() const;
 
 
     // methods using per-set properties
     QString getPicURL(const QString &set) const
     {
+        return "https://static.krcg.org/card/ubendeg4.jpg";
         if (set == nullptr) {
             return getProperty("picurl");
         }
