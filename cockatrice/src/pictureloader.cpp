@@ -53,7 +53,7 @@ void PictureToLoad::populateSetUrls()
     currentSetUrls.clear();
 
     if (card && currentSet) {
-        QString setCustomURL = card->getCustomPicURL(currentSet->getShortName());
+        QString setCustomURL = card->getPicURL(nullptr);
 
         if (!setCustomURL.isEmpty()) {
             currentSetUrls.append(setCustomURL);
@@ -587,16 +587,14 @@ void PictureLoader::getPixmap(QPixmap &pixmap, CardInfoPtr card, QSize size)
 
 void PictureLoader::imageLoaded(CardInfoPtr card, const QImage &image)
 {
+    QPixmap pixmap;
     if (image.isNull()) {
-        QPixmapCache::insert(card->getPixmapCacheKey(), QPixmap());
+        pixmap = QPixmap();
     } else {
-        if (card->getUpsideDownArt()) {
-            QImage mirrorImage = image.mirrored(true, true);
-            QPixmapCache::insert(card->getPixmapCacheKey(), QPixmap::fromImage(mirrorImage));
-        } else {
-            QPixmapCache::insert(card->getPixmapCacheKey(), QPixmap::fromImage(image));
-        }
+        pixmap = QPixmap::fromImage(image);
     }
+
+    QPixmapCache::insert(card->getPixmapCacheKey(), pixmap);
 
     card->emitPixmapUpdated();
 }

@@ -50,7 +50,7 @@ void DeckListModel::rebuildTree()
             }
 
             CardInfoPtr info = db->getCard(currentCard->getName());
-            QString cardType = info ? info->getMainCardType() : "unknown";
+            QString cardType = info ? info->getCardTypes().join(", ") : "unknown";
 
             auto *cardTypeNode = dynamic_cast<InnerDecklistNode *>(node->findChild(cardType));
 
@@ -294,7 +294,7 @@ DecklistModelCardNode *DeckListModel::findCardNode(const QString &cardName, cons
         return nullptr;
     }
 
-    cardType = info->getMainCardType();
+    cardType = info->getCardTypes().join(", ");
     typeNode = dynamic_cast<InnerDecklistNode *>(zoneNode->findChild(cardType));
     if (!typeNode) {
         return nullptr;
@@ -332,7 +332,7 @@ QModelIndex DeckListModel::addCard(const QString &cardName, const QString &zoneN
 
     InnerDecklistNode *zoneNode = createNodeIfNeeded(zoneName, root);
 
-    QString cardType = info->getMainCardType();
+    QString cardType = info->getCardTypes().join(", ");
     InnerDecklistNode *cardTypeNode = createNodeIfNeeded(cardType, zoneNode);
 
     QModelIndex parentIndex = nodeToIndex(cardTypeNode);

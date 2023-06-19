@@ -471,20 +471,6 @@ void TabDeckEditor::databaseCustomMenu(QPoint point)
     connect(addToDeck, SIGNAL(triggered()), this, SLOT(actAddCard()));
     connect(addToSideboard, SIGNAL(triggered()), this, SLOT(actAddCardToSideboard()));
 
-    // filling out the related cards submenu
-    auto *relatedMenu = new QMenu(tr("Show Related cards"));
-    menu.addMenu(relatedMenu);
-    auto relatedCards = info->getAllRelatedCards();
-    if (relatedCards.isEmpty()) {
-        relatedMenu->setDisabled(true);
-    } else {
-        for (const CardRelation *rel : relatedCards) {
-            const QString &relatedCardName = rel->getName();
-            QAction *relatedCard = relatedMenu->addAction(relatedCardName);
-            connect(relatedCard, &QAction::triggered, cardInfo,
-                    [this, relatedCardName] { cardInfo->setCard(relatedCardName); });
-        }
-    }
     menu.exec(databaseView->mapToGlobal(point));
 }
 

@@ -93,11 +93,11 @@ public:
     void retranslateUi() override;
 };
 
-class LoadSetsPage : public OracleWizardPage
+class LoadCardsPage : public OracleWizardPage
 {
     Q_OBJECT
 public:
-    explicit LoadSetsPage(QWidget *parent = nullptr);
+    explicit LoadCardsPage(QWidget *parent = nullptr);
     void retranslateUi() override;
 
 protected:
@@ -127,11 +127,11 @@ private slots:
     void importFinished();
 };
 
-class SaveSetsPage : public OracleWizardPage
+class SaveCardsPage : public OracleWizardPage
 {
     Q_OBJECT
 public:
-    explicit SaveSetsPage(QWidget *parent = nullptr);
+    explicit SaveCardsPage(QWidget *parent = nullptr);
     void retranslateUi() override;
 
 private:
@@ -146,7 +146,7 @@ protected:
     bool validatePage() override;
 
 private slots:
-    void updateTotalProgress(int cardsImported, int setIndex, const QString &setName);
+    void updateTotalProgress(int cardIndex, const QString &cardName);
 };
 
 #endif

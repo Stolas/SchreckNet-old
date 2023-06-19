@@ -461,7 +461,7 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
     aDecT = new QAction(this);
     connect(aDecT, SIGNAL(triggered()), this, SLOT(actDecT()));
     aIncPT = new QAction(this);
-    connect(aIncPT, SIGNAL(triggered()), this, SLOT(actIncPT()));
+    connect(aIncPT, SIGNAL(triggered()), this, SLOT(actIncBlood()));
     aDecPT = new QAction(this);
     connect(aDecPT, SIGNAL(triggered()), this, SLOT(actDecPT()));
     aFlowP = new QAction(this);
@@ -469,7 +469,7 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
     aFlowT = new QAction(this);
     connect(aFlowT, SIGNAL(triggered()), this, SLOT(actFlowT()));
     aSetPT = new QAction(this);
-    connect(aSetPT, SIGNAL(triggered()), this, SLOT(actSetPT()));
+    connect(aSetPT, SIGNAL(triggered()), this, SLOT(actSetBlood()));
     aResetPT = new QAction(this);
     connect(aResetPT, SIGNAL(triggered()), this, SLOT(actResetPT()));
     aSetAnnotation = new QAction(this);
@@ -1544,16 +1544,16 @@ void Player::actCreateToken()
     }
 
     lastTokenName = dlg.getName();
-    lastTokenPT = dlg.getPT();
+    lastTokenPT = dlg.getBlood();
     CardInfoPtr correctedCard = db->guessCard(lastTokenName);
     if (correctedCard) {
         lastTokenName = correctedCard->getName();
         lastTokenTableRow = TableZone::clampValidTableRow(2 - correctedCard->getTableRow());
         if (lastTokenPT.isEmpty()) {
-            lastTokenPT = correctedCard->getPowTough();
+            //lastTokenPT = correctedCard->getPowTough();
         }
     }
-    lastTokenColor = dlg.getColor();
+    // lastTokenColor = dlg.getColor();
     lastTokenAnnotation = dlg.getAnnotation();
     lastTokenDestroy = dlg.getDestroy();
     aCreateAnotherToken->setEnabled(true);
@@ -1600,132 +1600,132 @@ void Player::actCreateRelatedCard()
         return;
     }
     auto *action = static_cast<QAction *>(sender());
-    // If there is a better way of passing a CardRelation through a QAction, please add it here.
-    auto relatedCards = sourceCard->getInfo()->getAllRelatedCards();
-    CardRelation *cardRelation = relatedCards.at(action->data().toInt());
+    // // If there is a better way of passing a CardRelation through a QAction, please add it here.
+    // auto relatedCards = sourceCard->getInfo()->getAllRelatedCards();
+    // CardRelation *cardRelation = relatedCards.at(action->data().toInt());
 
     /*
      * If we make a token via "Token: TokenName"
      * then let's allow it to be created via "create another token"
-     */
-    if (createRelatedFromRelation(sourceCard, cardRelation) && cardRelation->getCanCreateAnother()) {
-        CardInfoPtr cardInfo = db->getCard(cardRelation->getName());
-        setLastToken(cardInfo);
-    }
+    //  */
+    // if (createRelatedFromRelation(sourceCard, cardRelation) && cardRelation->getCanCreateAnother()) {
+    //     CardInfoPtr cardInfo = db->getCard(cardRelation->getName());
+    //     setLastToken(cardInfo);
+    // }
 }
 
-void Player::actCreateAllRelatedCards()
-{
-    CardItem *sourceCard = game->getActiveCard();
-    if (!sourceCard) {
-        return;
-    }
+// void Player::actCreateAllRelatedCards()
+// {
+//     CardItem *sourceCard = game->getActiveCard();
+//     if (!sourceCard) {
+//         return;
+//     }
+// 
+//     auto relatedCards = sourceCard->getInfo()->getAllRelatedCards();
+//     if (relatedCards.isEmpty()) {
+//         return;
+//     }
+// 
+//     CardRelation *cardRelation = nullptr;
+//     int tokensTypesCreated = 0;
+// 
+//     if (relatedCards.length() == 1) {
+//         cardRelation = relatedCards.at(0);
+//         if (createRelatedFromRelation(sourceCard, cardRelation)) {
+//             ++tokensTypesCreated;
+//         }
+//     } else {
+//         QList<CardRelation *> nonExcludedRelatedCards;
+//         QString dbName;
+//         for (CardRelation *cardRelationTemp : relatedCards) {
+//             if (!cardRelationTemp->getIsCreateAllExclusion() && !cardRelationTemp->getDoesAttach()) {
+//                 nonExcludedRelatedCards.append(cardRelationTemp);
+//             }
+//         }
+//         switch (nonExcludedRelatedCards.length()) {
+//             case 1: // if nonExcludedRelatedCards == 1
+//                 cardRelation = nonExcludedRelatedCards.at(0);
+//                 if (createRelatedFromRelation(sourceCard, cardRelation)) {
+//                     ++tokensTypesCreated;
+//                 }
+//                 break;
+//             // If all are marked "Exclude", then treat the situation as if none of them are.
+//             // We won't accept "garbage in, garbage out", here.
+//             case 0: // else if nonExcludedRelatedCards == 0
+//                 for (CardRelation *cardRelationAll : relatedCards) {
+//                     if (!cardRelationAll->getDoesAttach() && !cardRelationAll->getIsVariable()) {
+//                         dbName = cardRelationAll->getName();
+//                         bool persistent = cardRelationAll->getIsPersistent();
+//                         for (int i = 0; i < cardRelationAll->getDefaultCount(); ++i) {
+//                             createCard(sourceCard, dbName, false, persistent);
+//                         }
+//                         ++tokensTypesCreated;
+//                         if (tokensTypesCreated == 1) {
+//                             cardRelation = cardRelationAll;
+//                         }
+//                     }
+//                 }
+//                 break;
+//             default: // else
+//                 for (CardRelation *cardRelationNotExcluded : nonExcludedRelatedCards) {
+//                     if (!cardRelationNotExcluded->getDoesAttach() && !cardRelationNotExcluded->getIsVariable()) {
+//                         dbName = cardRelationNotExcluded->getName();
+//                         bool persistent = cardRelationNotExcluded->getIsPersistent();
+//                         for (int i = 0; i < cardRelationNotExcluded->getDefaultCount(); ++i) {
+//                             createCard(sourceCard, dbName, false, persistent);
+//                         }
+//                         ++tokensTypesCreated;
+//                         if (tokensTypesCreated == 1) {
+//                             cardRelation = cardRelationNotExcluded;
+//                         }
+//                     }
+//                 }
+//                 break;
+//         }
+//     }
+// 
+//     /*
+//      * If we made at least one token via "Create All Tokens"
+//      * then assign the first to the "Create another" shortcut.
+//      */
+//     if (cardRelation != nullptr && cardRelation->getCanCreateAnother()) {
+//         CardInfoPtr cardInfo = db->getCard(cardRelation->getName());
+//         setLastToken(cardInfo);
+//     }
+// }
 
-    auto relatedCards = sourceCard->getInfo()->getAllRelatedCards();
-    if (relatedCards.isEmpty()) {
-        return;
-    }
-
-    CardRelation *cardRelation = nullptr;
-    int tokensTypesCreated = 0;
-
-    if (relatedCards.length() == 1) {
-        cardRelation = relatedCards.at(0);
-        if (createRelatedFromRelation(sourceCard, cardRelation)) {
-            ++tokensTypesCreated;
-        }
-    } else {
-        QList<CardRelation *> nonExcludedRelatedCards;
-        QString dbName;
-        for (CardRelation *cardRelationTemp : relatedCards) {
-            if (!cardRelationTemp->getIsCreateAllExclusion() && !cardRelationTemp->getDoesAttach()) {
-                nonExcludedRelatedCards.append(cardRelationTemp);
-            }
-        }
-        switch (nonExcludedRelatedCards.length()) {
-            case 1: // if nonExcludedRelatedCards == 1
-                cardRelation = nonExcludedRelatedCards.at(0);
-                if (createRelatedFromRelation(sourceCard, cardRelation)) {
-                    ++tokensTypesCreated;
-                }
-                break;
-            // If all are marked "Exclude", then treat the situation as if none of them are.
-            // We won't accept "garbage in, garbage out", here.
-            case 0: // else if nonExcludedRelatedCards == 0
-                for (CardRelation *cardRelationAll : relatedCards) {
-                    if (!cardRelationAll->getDoesAttach() && !cardRelationAll->getIsVariable()) {
-                        dbName = cardRelationAll->getName();
-                        bool persistent = cardRelationAll->getIsPersistent();
-                        for (int i = 0; i < cardRelationAll->getDefaultCount(); ++i) {
-                            createCard(sourceCard, dbName, false, persistent);
-                        }
-                        ++tokensTypesCreated;
-                        if (tokensTypesCreated == 1) {
-                            cardRelation = cardRelationAll;
-                        }
-                    }
-                }
-                break;
-            default: // else
-                for (CardRelation *cardRelationNotExcluded : nonExcludedRelatedCards) {
-                    if (!cardRelationNotExcluded->getDoesAttach() && !cardRelationNotExcluded->getIsVariable()) {
-                        dbName = cardRelationNotExcluded->getName();
-                        bool persistent = cardRelationNotExcluded->getIsPersistent();
-                        for (int i = 0; i < cardRelationNotExcluded->getDefaultCount(); ++i) {
-                            createCard(sourceCard, dbName, false, persistent);
-                        }
-                        ++tokensTypesCreated;
-                        if (tokensTypesCreated == 1) {
-                            cardRelation = cardRelationNotExcluded;
-                        }
-                    }
-                }
-                break;
-        }
-    }
-
-    /*
-     * If we made at least one token via "Create All Tokens"
-     * then assign the first to the "Create another" shortcut.
-     */
-    if (cardRelation != nullptr && cardRelation->getCanCreateAnother()) {
-        CardInfoPtr cardInfo = db->getCard(cardRelation->getName());
-        setLastToken(cardInfo);
-    }
-}
-
-bool Player::createRelatedFromRelation(const CardItem *sourceCard, const CardRelation *cardRelation)
-{
-    if (sourceCard == nullptr || cardRelation == nullptr) {
-        return false;
-    }
-    QString dbName = cardRelation->getName();
-    bool persistent = cardRelation->getIsPersistent();
-    if (cardRelation->getIsVariable()) {
-        bool ok;
-        dialogSemaphore = true;
-        int count = QInputDialog::getInt(game, tr("Create tokens"), tr("Number:"), cardRelation->getDefaultCount(), 1,
-                                         MAX_TOKENS_PER_DIALOG, 1, &ok);
-        dialogSemaphore = false;
-        if (!ok) {
-            return false;
-        }
-        for (int i = 0; i < count; ++i) {
-            createCard(sourceCard, dbName, false, persistent);
-        }
-    } else if (cardRelation->getDefaultCount() > 1) {
-        for (int i = 0; i < cardRelation->getDefaultCount(); ++i) {
-            createCard(sourceCard, dbName, false, persistent);
-        }
-    } else {
-        if (cardRelation->getDoesAttach()) {
-            createAttachedCard(sourceCard, dbName, persistent);
-        } else {
-            createCard(sourceCard, dbName, false, persistent);
-        }
-    }
-    return true;
-}
+// bool Player::createRelatedFromRelation(const CardItem *sourceCard, const CardRelation *cardRelation)
+// {
+//     if (sourceCard == nullptr || cardRelation == nullptr) {
+//         return false;
+//     }
+//     QString dbName = cardRelation->getName();
+//     bool persistent = cardRelation->getIsPersistent();
+//     if (cardRelation->getIsVariable()) {
+//         bool ok;
+//         dialogSemaphore = true;
+//         int count = QInputDialog::getInt(game, tr("Create tokens"), tr("Number:"), cardRelation->getDefaultCount(), 1,
+//                                          MAX_TOKENS_PER_DIALOG, 1, &ok);
+//         dialogSemaphore = false;
+//         if (!ok) {
+//             return false;
+//         }
+//         for (int i = 0; i < count; ++i) {
+//             createCard(sourceCard, dbName, false, persistent);
+//         }
+//     } else if (cardRelation->getDefaultCount() > 1) {
+//         for (int i = 0; i < cardRelation->getDefaultCount(); ++i) {
+//             createCard(sourceCard, dbName, false, persistent);
+//         }
+//     } else {
+//         if (cardRelation->getDoesAttach()) {
+//             createAttachedCard(sourceCard, dbName, persistent);
+//         } else {
+//             createCard(sourceCard, dbName, false, persistent);
+//         }
+//     }
+//     return true;
+// }
 
 void Player::createCard(const CardItem *sourceCard, const QString &dbCardName, bool attach, bool persistent)
 {
@@ -1743,19 +1743,19 @@ void Player::createCard(const CardItem *sourceCard, const QString &dbCardName, b
     Command_CreateToken cmd;
     cmd.set_zone("table");
     cmd.set_card_name(cardInfo->getName().toStdString());
-    switch (cardInfo->getColors().size()) {
-        case 0:
-            cmd.set_color("");
-            break;
-        case 1:
-            cmd.set_color("m");
-            break;
-        default:
-            cmd.set_color(cardInfo->getColors().left(1).toLower().toStdString());
-            break;
-    }
+    // switch (cardInfo->getColors().size()) {
+    //     case 0:
+    //         cmd.set_color("");
+    //         break;
+    //     case 1:
+    //         cmd.set_color("m");
+    //         break;
+    //     default:
+    //         cmd.set_color(cardInfo->getColors().left(1).toLower().toStdString());
+    //         break;
+    // }
 
-    cmd.set_pt(cardInfo->getPowTough().toStdString());
+    // cmd.set_pt(cardInfo->getPowTough().toStdString());
     if (SettingsCache::instance().getAnnotateTokens()) {
         cmd.set_annotation(cardInfo->getText().toStdString());
     } else {
@@ -1833,7 +1833,7 @@ void Player::setCardAttrHelper(const GameEventContext &context,
         }
         case AttrPT: {
             emit logSetPT(this, card, avalue);
-            card->setPT(avalue);
+            //card->setPT(avalue);
             break;
         }
     }
@@ -1917,18 +1917,18 @@ void Player::eventCreateToken(const Event_CreateToken &event)
     CardItem *card = new CardItem(this, QString::fromStdString(event.card_name()), event.card_id());
     // use db PT if not provided in event
     if (!QString::fromStdString(event.pt()).isEmpty()) {
-        card->setPT(QString::fromStdString(event.pt()));
+        //card->setPT(QString::fromStdString(event.pt()));
     } else {
         CardInfoPtr dbCard = card->getInfo();
         if (dbCard) {
-            card->setPT(dbCard->getPowTough());
+            // card->setPT(dbCard->getPowTough());
         }
     }
-    card->setColor(QString::fromStdString(event.color()));
+    //card->setColor(QString::fromStdString(event.color()));
     card->setAnnotation(QString::fromStdString(event.annotation()));
     card->setDestroyOnZoneChange(event.destroy_on_zone_change());
 
-    emit logCreateToken(this, card->getName(), card->getPT());
+    //emit logCreateToken(this, card->getName(), card->getPT());
     zone->addCard(card, true, event.x(), event.y());
 }
 
@@ -2487,7 +2487,7 @@ void Player::playCard(CardItem *card, bool faceDown, bool tapped)
         QPoint gridPoint = QPoint(-1, TableZone::clampValidTableRow(2 - tableRow));
         cardToMove->set_face_down(faceDown);
         if (!faceDown) {
-            cardToMove->set_pt(info->getPowTough().toStdString());
+            // cardToMove->set_pt(info->getPowTough().toStdString());
         }
         cardToMove->set_tapped(faceDown ? false : tapped);
         if (tableRow != 3)
@@ -2817,7 +2817,7 @@ void Player::cardMenuAction()
                     if (card->getFaceDown()) {
                         CardInfoPtr ci = card->getInfo();
                         if (ci) {
-                            cmd->set_pt(ci->getPowTough().toStdString());
+                            // cmd->set_pt(ci->getPowTough().toStdString());
                         }
                     }
                     commandList.append(cmd);
@@ -2836,7 +2836,7 @@ void Player::cardMenuAction()
                     cmd->set_zone("table");
                     cmd->set_card_name(card->getName().toStdString());
                     cmd->set_color(card->getColor().toStdString());
-                    cmd->set_pt(card->getPT().toStdString());
+                    // cmd->set_pt(card->getPT().toStdString());
                     cmd->set_annotation(card->getAnnotation().toStdString());
                     cmd->set_destroy_on_zone_change(true);
                     cmd->set_x(-1);
@@ -2939,14 +2939,14 @@ void Player::cardMenuAction()
     }
 }
 
-void Player::actIncPT(int deltaP, int deltaT)
+void Player::actIncBlood(int deltaP, int deltaT)
 {
     int playerid = id;
 
     QList<const ::google::protobuf::Message *> commandList;
     for (const auto &item : scene()->selectedItems()) {
         auto *card = static_cast<CardItem *>(item);
-        QString pt = card->getPT();
+        QString pt = card->getBlood();
         const auto ptList = parsePT(pt);
         QString newpt;
         if (ptList.isEmpty()) {
@@ -2983,10 +2983,10 @@ void Player::actResetPT()
         if (!card->getFaceDown()) { // leave the pt empty if the card is face down
             CardInfoPtr info = card->getInfo();
             if (info) {
-                ptString = info->getPowTough();
+                // ptString = info->getPowTough();
             }
         }
-        if (ptString == card->getPT()) {
+        if (ptString == card->getBlood()) {
             continue;
         }
         QString zoneName = card->getZone()->getName();
@@ -3038,22 +3038,22 @@ QVariantList Player::parsePT(const QString &pt)
     return ptList;
 }
 
-void Player::actSetPT()
+void Player::actSetBlood()
 {
-    QString oldPT;
+    QString oldBlood;
     int playerid = id;
 
     auto sel = scene()->selectedItems();
     for (const auto &item : sel) {
         auto *card = static_cast<CardItem *>(item);
-        if (!card->getPT().isEmpty()) {
-            oldPT = card->getPT();
+        if (!card->getBlood().isEmpty()) {
+            oldBlood = card->getBlood();
         }
     }
     bool ok;
     dialogSemaphore = true;
     QString pt =
-        getTextWithMax(game, tr("Change power/toughness"), tr("Change stats to:"), QLineEdit::Normal, oldPT, &ok);
+        getTextWithMax(game, tr("Change power/toughness"), tr("Change stats to:"), QLineEdit::Normal, oldBlood, &ok);
     dialogSemaphore = false;
     if (clearCardsToDelete() || !ok) {
         return;
@@ -3068,7 +3068,7 @@ void Player::actSetPT()
         auto *cmd = new Command_SetCardAttr;
         QString newpt = QString();
         if (!empty) {
-            const auto oldpt = parsePT(card->getPT());
+            const auto oldpt = parsePT(card->getBlood());
             int ptIter = 0;
             for (const auto &item : ptList) {
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
@@ -3111,42 +3111,42 @@ void Player::actDrawArrow()
 
 void Player::actIncP()
 {
-    actIncPT(1, 0);
+    actIncBlood(1, 0);
 }
 
 void Player::actDecP()
 {
-    actIncPT(-1, 0);
+    actIncBlood(-1, 0);
 }
 
 void Player::actIncT()
 {
-    actIncPT(0, 1);
+    actIncBlood(0, 1);
 }
 
 void Player::actDecT()
 {
-    actIncPT(0, -1);
+    actIncBlood(0, -1);
 }
 
-void Player::actIncPT()
+void Player::actIncBlood()
 {
-    actIncPT(1, 1);
+    actIncBlood(1, 1);
 }
 
 void Player::actDecPT()
 {
-    actIncPT(-1, -1);
+    actIncBlood(-1, -1);
 }
 
 void Player::actFlowP()
 {
-    actIncPT(1, -1);
+    actIncBlood(1, -1);
 }
 
 void Player::actFlowT()
 {
-    actIncPT(-1, 1);
+    actIncBlood(-1, 1);
 }
 
 void Player::actSetAnnotation()
@@ -3282,8 +3282,7 @@ void Player::actPlay()
         return;
     }
 
-    bool cipt = game->getActiveCard()->getInfo() ? game->getActiveCard()->getInfo()->getCipt() : false;
-    playCard(game->getActiveCard(), false, cipt);
+    playCard(game->getActiveCard(), false, false);
 }
 
 void Player::actHide()
@@ -3340,7 +3339,7 @@ void Player::updateCardMenu(const CardItem *card)
 
     if (revealedCard) {
         cardMenu->addAction(aHide);
-        addRelatedCardView(card, cardMenu);
+        // addRelatedCardView(card, cardMenu);
     } else if (writeableCard) {
         if (moveMenu->isEmpty()) {
             moveMenu->addAction(aMoveToTopLibrary);
@@ -3381,9 +3380,6 @@ void Player::updateCardMenu(const CardItem *card)
                     cardMenu->addAction(aPeek);
                 }
 
-                addRelatedCardView(card, cardMenu);
-                addRelatedCardActions(card, cardMenu);
-
                 cardMenu->addSeparator();
                 cardMenu->addAction(aAttach);
                 if (card->getAttachedTo()) {
@@ -3413,8 +3409,6 @@ void Player::updateCardMenu(const CardItem *card)
                 cardMenu->addAction(aClone);
                 cardMenu->addMenu(moveMenu);
 
-                addRelatedCardView(card, cardMenu);
-                addRelatedCardActions(card, cardMenu);
             } else if (card->getZone()->getName() == "rfg" || card->getZone()->getName() == "grave") {
                 // Card is in the graveyard or exile
                 cardMenu->addAction(aPlay);
@@ -3423,14 +3417,11 @@ void Player::updateCardMenu(const CardItem *card)
                 cardMenu->addAction(aClone);
                 cardMenu->addMenu(moveMenu);
 
-                addRelatedCardView(card, cardMenu);
-                addRelatedCardActions(card, cardMenu);
             } else {
                 // Card is in hand or a custom zone specified by server
                 cardMenu->addAction(aPlay);
                 cardMenu->addAction(aPlayFacedown);
                 cardMenu->addMenu(moveMenu);
-                addRelatedCardView(card, cardMenu);
             }
         } else {
             cardMenu->addMenu(moveMenu);
@@ -3439,110 +3430,7 @@ void Player::updateCardMenu(const CardItem *card)
         if (card->getZone() && card->getZone()->getName() != "hand") {
             cardMenu->addAction(aDrawArrow);
             cardMenu->addSeparator();
-            addRelatedCardView(card, cardMenu);
-            addRelatedCardActions(card, cardMenu);
-            cardMenu->addSeparator();
-            cardMenu->addAction(aClone);
         }
-    }
-}
-
-void Player::addRelatedCardView(const CardItem *card, QMenu *cardMenu)
-{
-    if (!card || !cardMenu) {
-        return;
-    }
-    auto cardInfo = card->getInfo();
-    if (!cardInfo) {
-        return;
-    }
-
-    bool atLeastOneGoodRelationFound = false;
-    QList<CardRelation *> relatedCards = cardInfo->getAllRelatedCards();
-    for (const CardRelation *cardRelation : relatedCards) {
-        CardInfoPtr relatedCard = db->getCard(cardRelation->getName());
-        if (relatedCard != nullptr) {
-            atLeastOneGoodRelationFound = true;
-            break;
-        }
-    }
-
-    if (!atLeastOneGoodRelationFound) {
-        return;
-    }
-
-    cardMenu->addSeparator();
-    auto viewRelatedCards = new QMenu(tr("View related cards"));
-    cardMenu->addMenu(viewRelatedCards);
-    for (const CardRelation *relatedCard : relatedCards) {
-        QString relatedCardName = relatedCard->getName();
-        QAction *viewCard = viewRelatedCards->addAction(relatedCardName);
-        connect(viewCard, &QAction::triggered, game, [this, relatedCardName] { game->viewCardInfo(relatedCardName); });
-    }
-}
-
-void Player::addRelatedCardActions(const CardItem *card, QMenu *cardMenu)
-{
-    if (!card || !cardMenu) {
-        return;
-    }
-    auto cardInfo = card->getInfo();
-    if (!cardInfo) {
-        return;
-    }
-
-    QList<CardRelation *> relatedCards = cardInfo->getAllRelatedCards();
-    if (relatedCards.isEmpty()) {
-        return;
-    }
-
-    cardMenu->addSeparator();
-    int index = 0;
-    QAction *createRelatedCards = nullptr;
-    for (const CardRelation *cardRelation : relatedCards) {
-        CardInfoPtr relatedCard = db->getCard(cardRelation->getName());
-        if (relatedCard == nullptr)
-            continue;
-        QString relatedCardName;
-        if (relatedCard->getPowTough().size() > 0) {
-            relatedCardName = relatedCard->getPowTough() + " " + relatedCard->getName(); // "n/n name"
-        } else {
-            relatedCardName = relatedCard->getName(); // "name"
-        }
-
-        QString text = tr("Token: ");
-        if (cardRelation->getDoesAttach()) {
-            text += tr("Attach to ") + "\"" + relatedCardName + "\"";
-        } else if (cardRelation->getIsVariable()) {
-            text += "X " + relatedCardName;
-        } else if (cardRelation->getDefaultCount() != 1) {
-            text += QString::number(cardRelation->getDefaultCount()) + "x " + relatedCardName;
-        } else {
-            text += relatedCardName;
-        }
-
-        if (createRelatedCards == nullptr) {
-            if (relatedCards.length() == 1) {
-                createRelatedCards = new QAction(text, this); // set actCreateAllRelatedCards with this text
-                break; // do not set an individual entry as there is only one entry
-            } else {
-                createRelatedCards = new QAction(tr("All tokens"), this);
-            }
-        }
-
-        auto *createRelated = new QAction(text, this);
-        createRelated->setData(QVariant(index++));
-        connect(createRelated, SIGNAL(triggered()), this, SLOT(actCreateRelatedCard()));
-        cardMenu->addAction(createRelated);
-    }
-
-    if (createRelatedCards) {
-        if (shortcutsActive) {
-            createRelatedCards->setShortcut(
-                SettingsCache::instance().shortcuts().getSingleShortcut("Player/aCreateRelatedTokens"));
-        }
-        connect(createRelatedCards, SIGNAL(triggered()), this, SLOT(actCreateAllRelatedCards()));
-        cardMenu->addAction(createRelatedCards);
     }
 }
 
@@ -3629,8 +3517,8 @@ void Player::setLastToken(CardInfoPtr cardInfo)
     }
 
     lastTokenName = cardInfo->getName();
-    lastTokenColor = cardInfo->getColors().isEmpty() ? QString() : cardInfo->getColors().left(1).toLower();
-    lastTokenPT = cardInfo->getPowTough();
+    //lastTokenColor = cardInfo->getColors().isEmpty() ? QString() : cardInfo->getColors().left(1).toLower();
+    // lastTokenPT = cardInfo->getPowTough();
     lastTokenAnnotation = SettingsCache::instance().getAnnotateTokens() ? cardInfo->getText() : "";
     lastTokenTableRow = TableZone::clampValidTableRow(2 - cardInfo->getTableRow());
     lastTokenDestroy = true;

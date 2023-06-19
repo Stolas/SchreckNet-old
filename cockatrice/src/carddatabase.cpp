@@ -218,11 +218,12 @@ CardInfoPerSet::CardInfoPerSet(const CardSetPtr &_set) : set(_set)
 
 CardInfo::CardInfo(const QString &_name,
                    const QString &_text,
+                   bool _isCrypt,
                    bool _isToken,
                    QVariantHash _properties,
                    CardInfoPerSetMap _sets,
                    int _tableRow )
-    : name(_name), text(_text), isToken(_isToken), properties(std::move(_properties)), 
+    : name(_name), text(_text), isCrypt(_isCrypt), isToken(_isToken), properties(std::move(_properties)), 
       sets(std::move(_sets)), tableRow(_tableRow)
 {
     pixmapCacheKey = QLatin1String("card_") + name;
@@ -238,12 +239,13 @@ CardInfo::~CardInfo()
 
 CardInfoPtr CardInfo::newInstance(const QString &_name,
                                   const QString &_text,
+                                  bool _isCrypt,
                                   bool _isToken,
                                   QVariantHash _properties,
                                   CardInfoPerSetMap _sets,
                                   int _tableRow)
 {
-    CardInfoPtr ptr(new CardInfo(_name, _text, _isToken, std::move(_properties), _sets, _tableRow));
+    CardInfoPtr ptr(new CardInfo(_name, _text, _isCrypt, _isToken, std::move(_properties), _sets, _tableRow));
     ptr->setSmartPointer(ptr);
 
     for (const CardInfoPerSet &set : _sets) {
@@ -253,11 +255,14 @@ CardInfoPtr CardInfo::newInstance(const QString &_name,
     return ptr;
 }
 
+
+/* Todo; Optimize out */
 QString CardInfo::getCorrectedName() const
 {
-    QString result = name;
+    return name;
+    //QString result = name;
     // Fire // Ice, Circle of Protection: Red, "Ach! Hans, Run!", Who/What/When/Where/Why, Question Elemental?
-    return result.remove(" // ").remove(':').remove('"').remove('?').replace('/', ' ');
+    //return result.remove(" // ").remove(':').remove('"').remove('?').replace('/', ' ');
 }
 
 void CardInfo::addToSet(const CardSetPtr &_set, const CardInfoPerSet _info)
@@ -292,7 +297,7 @@ QString CardInfo::simplifyName(const QString &name)
 
     // So Aetherling would work, but not Ætherling since 'Æ' would get replaced
     // with nothing.
-    simpleName.replace("æ", "ae");
+    simpleName.replace("™", "(TM)");
 
     // Replace Jötun Grunt with Jotun Grunt.
     simpleName = simpleName.normalized(QString::NormalizationForm_KD);
@@ -300,19 +305,6 @@ QString CardInfo::simplifyName(const QString &name)
     // remove all non alphanumeric characters from the name
     simpleName.remove(nonAlnum);
     return simpleName;
-}
-
-const QChar CardInfo::getColorChar() const
-{
-    QString colors = getColors();
-    switch (colors.size()) {
-        case 0:
-            return QChar();
-        case 1:
-            return colors.at(0);
-        default:
-            return QChar('m');
-    }
 }
 
 CardDatabase::CardDatabase(QObject *parent) : QObject(parent), loadStatus(NotLoaded)
@@ -389,15 +381,6 @@ void CardDatabase::removeCard(CardInfoPtr card)
         qDebug() << "removeCard(nullptr)";
         return;
     }
-
-    for (auto *cardRelation : card->getRelatedCards())
-        cardRelation->deleteLater();
-
-    for (auto *cardRelation : card->getReverseRelatedCards())
-        cardRelation->deleteLater();
-
-    for (auto *cardRelation : card->getReverseRelatedCards2Me())
-        cardRelation->deleteLater();
 
     removeCardMutex->lock();
     cards.remove(card->getName());
@@ -481,6 +464,8 @@ LoadStatus CardDatabase::loadFromFile(const QString &fileName)
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);
     if (!file.isOpen()) {
+        auto errStr = file.errorString();
+        qDebug() << "Failed to load file: " << errStr;
         return FileError;
     }
 
@@ -544,8 +529,6 @@ LoadStatus CardDatabase::loadCardDatabases()
 
     // AFTER all the cards have been loaded
 
-    // resolve the reverse-related tags
-    refreshCachedReverseRelatedCards();
 
     if (loadStatus == Ok) {
         checkUnknownSets(); // update deck editors, etc
@@ -559,36 +542,15 @@ LoadStatus CardDatabase::loadCardDatabases()
     return loadStatus;
 }
 
-void CardDatabase::refreshCachedReverseRelatedCards()
-{
-    for (const CardInfoPtr &card : cards)
-        card->resetReverseRelatedCards2Me();
-
-    for (const CardInfoPtr &card : cards) {
-        if (card->getReverseRelatedCards().isEmpty()) {
-            continue;
-        }
-
-        foreach (CardRelation *cardRelation, card->getReverseRelatedCards()) {
-            const QString &targetCard = cardRelation->getName();
-            if (!cards.contains(targetCard)) {
-                continue;
-            }
-
-            auto *newCardRelation = new CardRelation(card->getName(), cardRelation->getDoesAttach(),
-                                                     cardRelation->getIsCreateAllExclusion(),
-                                                     cardRelation->getIsVariable(), cardRelation->getDefaultCount());
-            cards.value(targetCard)->addReverseRelatedCards2Me(newCardRelation);
-        }
-    }
-}
-
 QStringList CardDatabase::getAllMainCardTypes() const
 {
     QSet<QString> types;
     QHashIterator<QString, CardInfoPtr> cardIterator(cards);
     while (cardIterator.hasNext()) {
-        types.insert(cardIterator.next().value()->getMainCardType());
+        auto card = cardIterator.next().value();
+        for (auto &type : card->getPropertyList(VTES::CardTypes)) {
+            types.insert(type);
+        }
     }
     return types.values();
 }
@@ -659,63 +621,28 @@ bool CardDatabase::saveCustomTokensToFile()
     return true;
 }
 
-CardRelation::CardRelation(const QString &_name,
-                           bool _doesAttach,
-                           bool _isCreateAllExclusion,
-                           bool _isVariableCount,
-                           int _defaultCount,
-                           bool _isPersistent)
-    : name(_name), doesAttach(_doesAttach), isCreateAllExclusion(_isCreateAllExclusion),
-      isVariableCount(_isVariableCount), defaultCount(_defaultCount), isPersistent(_isPersistent)
-{
-}
-
-void CardInfo::resetReverseRelatedCards2Me()
-{
-    foreach (CardRelation *cardRelation, this->getReverseRelatedCards2Me()) {
-        cardRelation->deleteLater();
-    }
-    reverseRelatedCardsToMe = QList<CardRelation *>();
-}
-
 // Back-compatibility methods. Remove ASAP
-const QString CardInfo::getCardType() const
+const QStringList CardInfo::getCardTypes() const
 {
-    return getProperty(Mtg::CardType);
+    return getPropertyList(VTES::CardTypes);
 }
-void CardInfo::setCardType(const QString &value)
+void CardInfo::setCardTypes(const QStringList& values)
 {
-    setProperty(Mtg::CardType, value);
+    setPropertyList(VTES::CardTypes, values);
 }
-const QString CardInfo::getCmc() const
+const QString CardInfo::getCapacity() const
 {
-    return getProperty(Mtg::ConvertedManaCost);
+    return getProperty(VTES::Capacity);
 }
-const QString CardInfo::getColors() const
+const QString CardInfo::getPool() const
 {
-    return getProperty(Mtg::Colors);
+    return getProperty(VTES::PoolCost);
 }
-void CardInfo::setColors(const QString &value)
+const QString CardInfo::getBlood() const
 {
-    setProperty(Mtg::Colors, value);
+    return getProperty(VTES::BloodCost);
 }
-const QString CardInfo::getLoyalty() const
+const QStringList CardInfo::getClans() const
 {
-    return getProperty(Mtg::Loyalty);
-}
-const QString CardInfo::getMainCardType() const
-{
-    return getProperty(Mtg::MainCardType);
-}
-const QString CardInfo::getManaCost() const
-{
-    return getProperty(Mtg::ManaCost);
-}
-const QString CardInfo::getPowTough() const
-{
-    return getProperty(Mtg::PowTough);
-}
-void CardInfo::setPowTough(const QString &value)
-{
-    setProperty(Mtg::PowTough, value);
+    return getPropertyList(VTES::Clans);
 }

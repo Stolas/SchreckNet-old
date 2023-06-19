@@ -155,44 +155,45 @@ bool FilterItem::acceptName(const CardInfoPtr info) const
 
 bool FilterItem::acceptType(const CardInfoPtr info) const
 {
-    return info->getCardType().contains(term, Qt::CaseInsensitive);
+    return info->getCardTypes().contains(term, Qt::CaseInsensitive);
 }
 
 bool FilterItem::acceptColor(const CardInfoPtr info) const
 {
-    QString converted_term = term.trimmed();
+    return true;
+    // QString converted_term = term.trimmed();
 
-    converted_term.replace("green", "g", Qt::CaseInsensitive);
-    converted_term.replace("grn", "g", Qt::CaseInsensitive);
-    converted_term.replace("blue", "u", Qt::CaseInsensitive);
-    converted_term.replace("blu", "u", Qt::CaseInsensitive);
-    converted_term.replace("black", "b", Qt::CaseInsensitive);
-    converted_term.replace("blk", "b", Qt::CaseInsensitive);
-    converted_term.replace("red", "r", Qt::CaseInsensitive);
-    converted_term.replace("white", "w", Qt::CaseInsensitive);
-    converted_term.replace("wht", "w", Qt::CaseInsensitive);
-    converted_term.replace("colorless", "c", Qt::CaseInsensitive);
-    converted_term.replace("colourless", "c", Qt::CaseInsensitive);
-    converted_term.replace("none", "c", Qt::CaseInsensitive);
+    // converted_term.replace("green", "g", Qt::CaseInsensitive);
+    // converted_term.replace("grn", "g", Qt::CaseInsensitive);
+    // converted_term.replace("blue", "u", Qt::CaseInsensitive);
+    // converted_term.replace("blu", "u", Qt::CaseInsensitive);
+    // converted_term.replace("black", "b", Qt::CaseInsensitive);
+    // converted_term.replace("blk", "b", Qt::CaseInsensitive);
+    // converted_term.replace("red", "r", Qt::CaseInsensitive);
+    // converted_term.replace("white", "w", Qt::CaseInsensitive);
+    // converted_term.replace("wht", "w", Qt::CaseInsensitive);
+    // converted_term.replace("colorless", "c", Qt::CaseInsensitive);
+    // converted_term.replace("colourless", "c", Qt::CaseInsensitive);
+    // converted_term.replace("none", "c", Qt::CaseInsensitive);
 
-    converted_term.replace(QString(" "), QString(""), Qt::CaseInsensitive);
+    // converted_term.replace(QString(" "), QString(""), Qt::CaseInsensitive);
 
-    // Colorless card filter
-    if (converted_term.toLower() == "c" && info->getColors().length() < 1) {
-        return true;
-    }
+    // // Colorless card filter
+    // // if (converted_term.toLower() == "c" && info->getColors().length() < 1) {
+    // //     return true;
+    // // }
 
-    /*
-     * This is a tricky part, if the filter has multiple colors in it, like UGW,
-     * then we should match all of them to the card's colors
-     */
-    int match_count = 0;
-    for (auto &it : converted_term) {
-        if (info->getColors().contains(it, Qt::CaseInsensitive))
-            match_count++;
-    }
+    // /*
+    //  * This is a tricky part, if the filter has multiple colors in it, like UGW,
+    //  * then we should match all of them to the card's colors
+    //  */
+    // int match_count = 0;
+    // // for (auto &it : converted_term) {
+    // //     if (info->getColors().contains(it, Qt::CaseInsensitive))
+    // //         match_count++;
+    // // }
 
-    return match_count == converted_term.length();
+    // return match_count == converted_term.length();
 }
 
 bool FilterItem::acceptText(const CardInfoPtr info) const
@@ -223,126 +224,110 @@ bool FilterItem::acceptManaCost(const CardInfoPtr info) const
 
     // Try to seperate the mana cost in case it's a split card
     // if it's not a split card the loop will run only once
-    for (QString fullManaCost : info->getManaCost().split("//")) {
-        std::sort(fullManaCost.begin(), fullManaCost.end());
+    // for (QString fullManaCost : info->getManaCost().split("//")) {
+    //     std::sort(fullManaCost.begin(), fullManaCost.end());
 
-        // If the partial is found in the full, return true
-        if (fullManaCost.contains(partialCost)) {
-            return true;
-        }
-    }
+    //     // If the partial is found in the full, return true
+    //     if (fullManaCost.contains(partialCost)) {
+    //         return true;
+    //     }
+    // }
     return false;
 }
 
-bool FilterItem::acceptCmc(const CardInfoPtr info) const
-{
-    bool convertSuccess;
-    int cmcInt = info->getCmc().toInt(&convertSuccess);
-    // if conversion failed, check for the "//" separator used in split cards
-    if (!convertSuccess) {
-        int cmcSum = 0;
-        for (const QString &cmc : info->getCmc().split("//")) {
-            cmcInt = cmc.toInt();
-            cmcSum += cmcInt;
-            if (relationCheck(cmcInt)) {
-                return true;
-            }
-        }
-        return relationCheck(cmcSum);
-    } else {
-        return relationCheck(cmcInt);
-    }
-}
+// bool FilterItem::acceptCmc(const CardInfoPtr info) const
+// {
+//     bool convertSuccess;
+//     int cmcInt = info->getCmc().toInt(&convertSuccess);
+//     // if conversion failed, check for the "//" separator used in split cards
+//     if (!convertSuccess) {
+//         int cmcSum = 0;
+//         for (const QString &cmc : info->getCmc().split("//")) {
+//             cmcInt = cmc.toInt();
+//             cmcSum += cmcInt;
+//             if (relationCheck(cmcInt)) {
+//                 return true;
+//             }
+//         }
+//         return relationCheck(cmcSum);
+//     } else {
+//         return relationCheck(cmcInt);
+//     }
+// }
 
 bool FilterItem::acceptFormat(const CardInfoPtr info) const
 {
     return info->getProperty(QString("format-%1").arg(term.toLower())) == "legal";
 }
 
-bool FilterItem::acceptLoyalty(const CardInfoPtr info) const
-{
-    if (info->getLoyalty().isEmpty()) {
-        return false;
-    } else {
-        bool success;
-        // if loyalty can't be converted to "int" it must be "X"
-        int loyalty = info->getLoyalty().toInt(&success);
-        if (success) {
-            return relationCheck(loyalty);
-        } else {
-            return term.trimmed().toUpper() == info->getLoyalty();
-        }
-    }
-}
-
-bool FilterItem::acceptPowerToughness(const CardInfoPtr info, CardFilter::Attr attr) const
-{
-    int slash = info->getPowTough().indexOf("/");
-    if (slash == -1) {
-        return false;
-    }
-    QString valueString;
-    if (attr == CardFilter::AttrPow) {
-        valueString = info->getPowTough().mid(0, slash);
-    } else {
-        valueString = info->getPowTough().mid(slash + 1);
-    }
-    if (term == valueString) {
-        return true;
-    }
-    // advanced filtering should only happen after fast string comparison failed
-    bool conversion;
-    int value = valueString.toInt(&conversion);
-    return conversion ? relationCheck(value) : false;
-}
-
-bool FilterItem::acceptRarity(const CardInfoPtr info) const
-{
-    QString converted_term = term.trimmed();
-
-    /*
-     * The purpose of this loop is to only apply one of the replacement
-     * policies and then escape. If we attempt to layer them on top of
-     * each other, we will get awkward results (i.e. comythic rare mythic rareon)
-     * Conditional statement will exit once a case is successful in
-     * replacement OR we go through all possible cases.
-     * Will also need to replace just "mythic"
-     */
-    for (int i = 0; converted_term.length() <= 3 && i <= 6; i++) {
-        switch (i) {
-            case 0:
-                converted_term.replace("mr", "mythic", Qt::CaseInsensitive);
-                break;
-            case 1:
-                converted_term.replace("m r", "mythic", Qt::CaseInsensitive);
-                break;
-            case 2:
-                converted_term.replace("m", "mythic", Qt::CaseInsensitive);
-                break;
-            case 3:
-                converted_term.replace("c", "common", Qt::CaseInsensitive);
-                break;
-            case 4:
-                converted_term.replace("u", "uncommon", Qt::CaseInsensitive);
-                break;
-            case 5:
-                converted_term.replace("r", "rare", Qt::CaseInsensitive);
-                break;
-            case 6:
-                converted_term.replace("s", "special", Qt::CaseInsensitive);
-                break;
-            default:
-                break;
-        }
-    }
-
-    for (const auto &set : info->getSets()) {
-        if (set.getProperty("rarity").compare(converted_term, Qt::CaseInsensitive) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
+// bool FilterItem::acceptPowerToughness(const CardInfoPtr info, CardFilter::Attr attr) const
+// {
+//     int slash = info->getPowTough().indexOf("/");
+//     if (slash == -1) {
+//         return false;
+//     }
+//     QString valueString;
+//     if (attr == CardFilter::AttrPow) {
+//         valueString = info->getPowTough().mid(0, slash);
+//     } else {
+//         valueString = info->getPowTough().mid(slash + 1);
+//     }
+//     if (term == valueString) {
+//         return true;
+//     }
+//     // advanced filtering should only happen after fast string comparison failed
+//     bool conversion;
+//     int value = valueString.toInt(&conversion);
+//     return conversion ? relationCheck(value) : false;
+// }
+// 
+// bool FilterItem::acceptRarity(const CardInfoPtr info) const
+// {
+//     QString converted_term = term.trimmed();
+// 
+//     /*
+//      * The purpose of this loop is to only apply one of the replacement
+//      * policies and then escape. If we attempt to layer them on top of
+//      * each other, we will get awkward results (i.e. comythic rare mythic rareon)
+//      * Conditional statement will exit once a case is successful in
+//      * replacement OR we go through all possible cases.
+//      * Will also need to replace just "mythic"
+//      */
+//     for (int i = 0; converted_term.length() <= 3 && i <= 6; i++) {
+//         switch (i) {
+//             case 0:
+//                 converted_term.replace("mr", "mythic", Qt::CaseInsensitive);
+//                 break;
+//             case 1:
+//                 converted_term.replace("m r", "mythic", Qt::CaseInsensitive);
+//                 break;
+//             case 2:
+//                 converted_term.replace("m", "mythic", Qt::CaseInsensitive);
+//                 break;
+//             case 3:
+//                 converted_term.replace("c", "common", Qt::CaseInsensitive);
+//                 break;
+//             case 4:
+//                 converted_term.replace("u", "uncommon", Qt::CaseInsensitive);
+//                 break;
+//             case 5:
+//                 converted_term.replace("r", "rare", Qt::CaseInsensitive);
+//                 break;
+//             case 6:
+//                 converted_term.replace("s", "special", Qt::CaseInsensitive);
+//                 break;
+//             default:
+//                 break;
+//         }
+//     }
+// 
+//     for (const auto &set : info->getSets()) {
+//         if (set.getProperty("rarity").compare(converted_term, Qt::CaseInsensitive) == 0) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 bool FilterItem::relationCheck(int cardInfo) const
 {
@@ -387,24 +372,24 @@ bool FilterItem::acceptCardAttr(const CardInfoPtr info, CardFilter::Attr attr) c
             return acceptName(info);
         case CardFilter::AttrType:
             return acceptType(info);
-        case CardFilter::AttrColor:
-            return acceptColor(info);
+        // case CardFilter::AttrColor:
+        //     return acceptColor(info);
         case CardFilter::AttrText:
             return acceptText(info);
         case CardFilter::AttrSet:
             return acceptSet(info);
-        case CardFilter::AttrManaCost:
-            return acceptManaCost(info);
-        case CardFilter::AttrCmc:
-            return acceptCmc(info);
-        case CardFilter::AttrRarity:
-            return acceptRarity(info);
-        case CardFilter::AttrPow:
-        case CardFilter::AttrTough:
-            // intentional fallthrough
-            return acceptPowerToughness(info, attr);
-        case CardFilter::AttrLoyalty:
-            return acceptLoyalty(info);
+        // case CardFilter::AttrManaCost:
+        //     return acceptManaCost(info);
+        // case CardFilter::AttrCmc:
+        //     return acceptCmc(info);
+        // case CardFilter::AttrRarity:
+        //     return acceptRarity(info);
+        // case CardFilter::AttrPow:
+        // case CardFilter::AttrTough:
+        //     // intentional fallthrough
+        //     return acceptPowerToughness(info, attr);
+        // case CardFilter::AttrLoyalty:
+        //     return acceptLoyalty(info);
         case CardFilter::AttrFormat:
             return acceptFormat(info);
         default:

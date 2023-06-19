@@ -8,8 +8,7 @@
 
 #define SCHRECKNET_XML_TAGNAME "schrecknetxml"
 #define SCHRECKNET_XML_TAGVER 1
-//#define SCHRECKNET_XML_SCHEMALOCATION                                                                                 \
-//    "https://raw.githubusercontent.com/Cockatrice/Cockatrice/master/doc/carddatabase_v3/cards.xsd"
+#define SCHRECKNET_XML_SCHEMALOCATION "https://raw.githubusercontent.com/Stolas/SchreckNet/master/doc/schrecknet.xsd"
 
 bool SchrecknetParser::getCanParseFile(const QString &fileName, QIODevice &device)
 {
@@ -140,6 +139,7 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
         }
 
         auto xmlName = xml.name().toString();
+        qDebug() << xmlName;
         if (xmlName == "card") {
             QString id = QString("");
             QString name = QString("");
@@ -151,7 +151,7 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
             auto attrs = xml.attributes();
             id = attrs.value("id").toString();
             name = attrs.value("name").toString();
-            auto picURL = attrs.value("picture").toString();
+            auto picURL = attrs.value("picurl").toString();
 
             while (!xml.atEnd()) {
                 if (xml.readNext() == QXmlStreamReader::EndElement) {
@@ -204,7 +204,7 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt) {
                         }
                     }
                 }
-                CardInfoPtr newCard = CardInfo::newInstance(name, text, false, properties, sets, tableRow);
+                CardInfoPtr newCard = CardInfo::newInstance(name, text, false, false, properties, sets, tableRow);
                 emit addCard(newCard);
             }
         }
@@ -247,34 +247,45 @@ static QXmlStreamWriter &operator<<(QXmlStreamWriter &xml, const CardInfoPtr &in
 
     QString tmpString;
 
+
+    // info->getIsCrypt();
+
     xml.writeStartElement("card");
+    xml.writeAttribute(QXmlStreamAttribute("id", info->getProperty("id")));
+    xml.writeAttribute(QXmlStreamAttribute("name", info->getName()));
+    xml.writeAttribute(QXmlStreamAttribute("picurl", info->getPicURL(nullptr)));
 
     // variable - assigned properties
-    xml.writeTextElement("name", info->getName());
     xml.writeTextElement("text", info->getText());
-    if (info->getIsToken()) {
-        xml.writeTextElement("token", "1");
-    }
 
     // generic properties
-    xml.writeTextElement("manacost", info->getProperty("manacost"));
-    xml.writeTextElement("cmc", info->getProperty("cmc"));
-    xml.writeTextElement("type", info->getProperty("type"));
-
-    int colorSize = info->getColors().size();
-    for (int i = 0; i < colorSize; ++i) {
-        xml.writeTextElement("color", info->getColors().at(i));
+    xml.writeStartElement("properties");
+    if (info->getIsCrypt()) {
+        xml.writeAttribute(QXmlStreamAttribute("capacity", info->getCapacity()));
+        xml.writeAttribute(QXmlStreamAttribute("group", info->getGroup()));
+    } else {
+        xml.writeAttribute(QXmlStreamAttribute("pool", info->getBlood()));
+        xml.writeAttribute(QXmlStreamAttribute("blood", info->getPool()));
     }
 
-    tmpString = info->getProperty("pt");
-    if (!tmpString.isEmpty()) {
-        xml.writeTextElement("pt", tmpString);
+    xml.writeStartElement("types");
+    for (auto &type : info->getCardTypes()) {
+        xml.writeStartElement("type");
+        qDebug() << info->getName() << type;
+        xml.writeAttribute(QXmlStreamAttribute("name", type));
+        xml.writeEndElement(); /* type */
     }
+    xml.writeEndElement(); /* types */
 
-    tmpString = info->getProperty("loyalty");
-    if (!tmpString.isEmpty()) {
-        xml.writeTextElement("loyalty", tmpString);
+    xml.writeStartElement("clans");
+    for (auto &clan : info->getClans()) {
+        xml.writeTextElement("clan", clan);
     }
+    xml.writeEndElement(); /* clans */
+
+
+    xml.writeEndElement(); /* properites */
+
 
     // sets
     const CardInfoPerSetMap sets = info->getSets();
@@ -298,61 +309,8 @@ static QXmlStreamWriter &operator<<(QXmlStreamWriter &xml, const CardInfoPtr &in
         xml.writeEndElement();
     }
 
-    // related cards
-    const QList<CardRelation *> related = info->getRelatedCards();
-    for (auto i : related) {
-        xml.writeStartElement("related");
-        if (i->getDoesAttach()) {
-            xml.writeAttribute("attach", "attach");
-        }
-        if (i->getIsCreateAllExclusion()) {
-            xml.writeAttribute("exclude", "exclude");
-        }
-
-        if (i->getIsVariable()) {
-            if (1 == i->getDefaultCount()) {
-                xml.writeAttribute("count", "x");
-            } else {
-                xml.writeAttribute("count", "x=" + QString::number(i->getDefaultCount()));
-            }
-        } else if (1 != i->getDefaultCount()) {
-            xml.writeAttribute("count", QString::number(i->getDefaultCount()));
-        }
-        xml.writeCharacters(i->getName());
-        xml.writeEndElement();
-    }
-    const QList<CardRelation *> reverseRelated = info->getReverseRelatedCards();
-    for (auto i : reverseRelated) {
-        xml.writeStartElement("reverse-related");
-        if (i->getDoesAttach()) {
-            xml.writeAttribute("attach", "attach");
-        }
-
-        if (i->getIsCreateAllExclusion()) {
-            xml.writeAttribute("exclude", "exclude");
-        }
-
-        if (i->getIsVariable()) {
-            if (1 == i->getDefaultCount()) {
-                xml.writeAttribute("count", "x");
-            } else {
-                xml.writeAttribute("count", "x=" + QString::number(i->getDefaultCount()));
-            }
-        } else if (1 != i->getDefaultCount()) {
-            xml.writeAttribute("count", QString::number(i->getDefaultCount()));
-        }
-        xml.writeCharacters(i->getName());
-        xml.writeEndElement();
-    }
-
     // positioning
     xml.writeTextElement("tablerow", QString::number(info->getTableRow()));
-    if (info->getCipt()) {
-        xml.writeTextElement("cipt", "1");
-    }
-    if (info->getUpsideDownArt()) {
-        xml.writeTextElement("upsidedown", "1");
-    }
 
     xml.writeEndElement(); // card
 
@@ -365,6 +323,7 @@ bool SchrecknetParser::saveToFile(SetNameMap sets,
                                       const QString &sourceUrl,
                                       const QString &sourceVersion)
 {
+    qDebug() << fileName;
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
@@ -377,7 +336,7 @@ bool SchrecknetParser::saveToFile(SetNameMap sets,
     xml.writeStartElement(SCHRECKNET_XML_TAGNAME);
     xml.writeAttribute("version", QString::number(SCHRECKNET_XML_TAGVER));
     xml.writeAttribute("xmlns:xsi", COCKATRICE_XML_XSI_NAMESPACE);
-    //xml.writeAttribute("xsi:schemaLocation", SCHRECKNET_XML_SCHEMALOCATION);
+    xml.writeAttribute("xsi:schemaLocation", SCHRECKNET_XML_SCHEMALOCATION);
 
     xml.writeStartElement("info");
     xml.writeTextElement("author", QCoreApplication::applicationName() + QString(" %1").arg(VERSION_STRING));
@@ -394,10 +353,32 @@ bool SchrecknetParser::saveToFile(SetNameMap sets,
         xml.writeEndElement();
     }
 
+    /* Note; yes this is slow, yes this should be optimized, no I dont care. */
     if (cards.count() > 0) {
-        xml.writeStartElement("cards");
+        xml.writeStartElement("crypt_cards");
         for (CardInfoPtr card : cards) {
-            xml << card;
+            if (card->getIsCrypt() && !card->getIsToken()) {
+                xml << card;
+            }
+        }
+        xml.writeEndElement();
+    }
+    if (cards.count() > 0) {
+        xml.writeStartElement("library_cards");
+        for (CardInfoPtr card : cards) {
+            if (!card->getIsCrypt() && !card->getIsToken()) {
+                xml << card;
+            }
+        }
+        xml.writeEndElement();
+    }
+
+    if (cards.count() > 0) {
+        xml.writeStartElement("tokens");
+        for (CardInfoPtr card : cards) {
+            if (card->getIsToken()) {
+                xml << card;
+            }
         }
         xml.writeEndElement();
     }

@@ -162,9 +162,9 @@ void DlgCreateToken::tokenSelectionChanged(const QModelIndex &current, const QMo
 
     if (cardInfo) {
         updateSearchFieldWithoutUpdatingFilter(cardInfo->getName());
-        const QChar cardColor = cardInfo->getColorChar();
-        colorEdit->setCurrentIndex(colorEdit->findData(cardColor, Qt::UserRole, Qt::MatchFixedString));
-        ptEdit->setText(cardInfo->getPowTough());
+        //const QChar cardColor = cardInfo->getColorChar();
+        // colorEdit->setCurrentIndex(colorEdit->findData(cardColor, Qt::UserRole, Qt::MatchFixedString));
+        // ptEdit->setText(cardInfo->getPowTough());
         if (SettingsCache::instance().getAnnotateTokens())
             annotationEdit->setText(cardInfo->getText());
     } else {
@@ -229,7 +229,7 @@ QString DlgCreateToken::getColor() const
     return QString(colorEdit->itemData(colorEdit->currentIndex()).toChar());
 }
 
-QString DlgCreateToken::getPT() const
+QString DlgCreateToken::getBlood() const
 {
     return ptEdit->text();
 }

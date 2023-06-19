@@ -6,7 +6,7 @@
 
 SchreckNet is a fork of [Cockatrice](https://cockatrice.github.io/) to play Vampire: The Eternal Struggle online.
 It serves as a modern replacement for LackyCCG.
-The program's server design prevents users from manipulating the game for unfair advantage. The client also provides a single-player mode, which allows users to brew while offline. This project uses C++ and the Qt6 libraries.<br>
+The program's server design prevents users from manipulating the game for unfair advantage. The client also provides a single-player mode, which allows users to brew while offline. This project uses C++ and the Qt6 libraries.<br> The Parthenon is used to upgrade the card database. <br>
 
 Portions of the materials are the copyrights and trademarks of Paradox Interactive AB, and are used with permission. All rights reserved. For more information please visit [white-wolf.com](http://www.white-wolf.com/).
 

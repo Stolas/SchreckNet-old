@@ -24,7 +24,7 @@ public:
     DlgCreateToken(const QStringList &_predefinedTokens, QWidget *parent = nullptr);
     QString getName() const;
     QString getColor() const;
-    QString getPT() const;
+    QString getBlood() const;
     QString getAnnotation() const;
     bool getDestroy() const;
 

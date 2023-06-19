@@ -47,7 +47,7 @@ void AbstractCardItem::cardInfoUpdated()
     if (!info && !name.isEmpty()) {
         QVariantHash properties = QVariantHash();
 
-        info = CardInfo::newInstance(name, "", true, QVariantHash(), CardInfoPerSetMap(), -1);
+        info = CardInfo::newInstance(name, "", false, true, QVariantHash(), CardInfoPerSetMap(), -1);
     }
     if (info.data()) {
         connect(info.data(), SIGNAL(pixmapUpdated()), this, SLOT(pixmapUpdated()));
@@ -214,6 +214,9 @@ void AbstractCardItem::setColor(const QString &_color)
 
 void AbstractCardItem::cacheBgColor()
 {
+
+    bgColor = QColor(0, 0, 0);
+    /*
     QChar colorChar;
     if (color.isEmpty()) {
         if (info)
@@ -245,6 +248,7 @@ void AbstractCardItem::cacheBgColor()
             bgColor = QColor(230, 230, 230);
             break;
     }
+    */
 }
 
 void AbstractCardItem::setTapped(bool _tapped, bool canAnimate)

@@ -18,13 +18,10 @@ private:
     QString dataDir;
 
     QString getMainCardType(const QStringList &typeList);
-    CardInfoPtr addCard(QString name,
-                        QString text,
-                        bool isToken,
-                        QVariantHash properties,
-                        CardInfoPerSet setInfo);
+    CardInfoPtr addCard(QString id, bool isCrypt, QString name, QString picture_url,
+                        QString text, QVariantHash properties, bool isToken);
 signals:
-    void setIndexChanged(int cardsImported, int setIndex, const QString &setName);
+    void cardIndexChanged(int cardIndex, const QString &cardName);
     void dataReadProgress(int bytesRead, int totalBytes);
 
 public:
@@ -44,6 +41,6 @@ public:
 
 protected:
     inline QString getStringPropertyFromMap(const QVariantMap &card, const QString &propertyName);
-    void sortAndReduceColors(QString &colors);
+    //void sortAndReduceColors(QString &colors);
 };
 

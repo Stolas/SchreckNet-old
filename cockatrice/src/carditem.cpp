@@ -107,24 +107,24 @@ void CardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     QSizeF translatedSize = getTranslatedSize(painter);
     qreal scaleFactor = translatedSize.width() / boundingRect().width();
 
-    if (!pt.isEmpty()) {
-        painter->save();
-        transformPainter(painter, translatedSize, tapAngle);
+    // if (!pt.isEmpty()) {
+    //     painter->save();
+    //     transformPainter(painter, translatedSize, tapAngle);
 
-        if (!getFaceDown() && info && pt == info->getPowTough()) {
-            painter->setPen(Qt::white);
-        } else {
-            painter->setPen(QColor(255, 150, 0)); // dark orange
-        }
+    //     if (!getFaceDown() && info && pt == info->getPowTough()) {
+    //         painter->setPen(Qt::white);
+    //     } else {
+    //         painter->setPen(QColor(255, 150, 0)); // dark orange
+    //     }
 
-        painter->setBackground(Qt::black);
-        painter->setBackgroundMode(Qt::OpaqueMode);
+    //     painter->setBackground(Qt::black);
+    //     painter->setBackgroundMode(Qt::OpaqueMode);
 
-        painter->drawText(QRectF(4 * scaleFactor, 4 * scaleFactor, translatedSize.width() - 10 * scaleFactor,
-                                 translatedSize.height() - 8 * scaleFactor),
-                          Qt::AlignRight | Qt::AlignBottom, pt);
-        painter->restore();
-    }
+    //     painter->drawText(QRectF(4 * scaleFactor, 4 * scaleFactor, translatedSize.width() - 10 * scaleFactor,
+    //                              translatedSize.height() - 8 * scaleFactor),
+    //                       Qt::AlignRight | Qt::AlignBottom, pt);
+    //     painter->restore();
+    // }
 
     if (!annotation.isEmpty()) {
         painter->save();
@@ -190,9 +190,9 @@ void CardItem::setDoesntUntap(bool _doesntUntap)
     update();
 }
 
-void CardItem::setPT(const QString &_pt)
+void CardItem::setBlood(const QString &_blood)
 {
-    pt = _pt;
+    blood = _blood;
     update();
 }
 
@@ -224,7 +224,7 @@ void CardItem::resetState()
     attacking = false;
     facedown = false;
     counters.clear();
-    pt.clear();
+    // pt.clear();
     annotation.clear();
     attachedTo = 0;
     attachedCards.clear();
@@ -248,7 +248,7 @@ void CardItem::processCardInfo(const ServerInfo_Card &info)
     setName(QString::fromStdString(info.name()));
     setAttacking(info.attacking());
     setFaceDown(info.face_down());
-    setPT(QString::fromStdString(info.pt()));
+    setBlood(QString::fromStdString(/* info.blood()*/ "0"));
     setAnnotation(QString::fromStdString(info.annotation()));
     setColor(QString::fromStdString(info.color()));
     setTapped(info.tapped());
@@ -383,7 +383,7 @@ void CardItem::playCard(bool faceDown)
     if (tz)
         tz->toggleTapped();
     else
-        zone->getPlayer()->playCard(this, faceDown, info ? info->getCipt() : false);
+        zone->getPlayer()->playCard(this, faceDown, false);
 }
 
 void CardItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)

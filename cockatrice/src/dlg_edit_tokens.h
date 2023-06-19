@@ -18,8 +18,8 @@ class DlgEditTokens : public QDialog
     Q_OBJECT
 private slots:
     void tokenSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
-    void colorChanged(int _colorIndex);
-    void ptChanged(const QString &_pt);
+    // void colorChanged(int _colorIndex);
+    //void ptChanged(const QString &_pt);
     void annotationChanged(const QString &_annotation);
 
     void actAddToken();

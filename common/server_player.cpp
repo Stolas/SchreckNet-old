@@ -1342,7 +1342,7 @@ Server_Player::cmdCreateToken(const Command_CreateToken &cmd, ResponseContainer 
     event.set_card_id(card->getId());
     event.set_card_name(card->getName().toStdString());
     event.set_color(card->getColor().toStdString());
-    event.set_pt(card->getPT().toStdString());
+    event.set_pt(card->getBlood().toStdString());
     event.set_annotation(card->getAnnotation().toStdString());
     event.set_destroy_on_zone_change(card->getDestroyOnZoneChange());
     event.set_x(xCoord);
@@ -1777,7 +1777,7 @@ Server_Player::cmdDumpZone(const Command_DumpZone &cmd, ResponseContainer &rc, G
             cardInfo->set_tapped(card->getTapped());
             cardInfo->set_attacking(card->getAttacking());
             cardInfo->set_color(card->getColor().toStdString());
-            cardInfo->set_pt(card->getPT().toStdString());
+            cardInfo->set_pt(card->getBlood().toStdString());
             cardInfo->set_annotation(card->getAnnotation().toStdString());
             cardInfo->set_destroy_on_zone_change(card->getDestroyOnZoneChange());
             cardInfo->set_doesnt_untap(card->getDoesntUntap());
@@ -1882,7 +1882,7 @@ Server_Player::cmdRevealCards(const Command_RevealCards &cmd, ResponseContainer 
         cardInfo->set_tapped(card->getTapped());
         cardInfo->set_attacking(card->getAttacking());
         cardInfo->set_color(card->getColor().toStdString());
-        cardInfo->set_pt(card->getPT().toStdString());
+        cardInfo->set_pt(card->getBlood().toStdString());
         cardInfo->set_annotation(card->getAnnotation().toStdString());
         cardInfo->set_destroy_on_zone_change(card->getDestroyOnZoneChange());
         cardInfo->set_doesnt_untap(card->getDoesntUntap());

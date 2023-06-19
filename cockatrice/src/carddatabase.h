@@ -12,12 +12,13 @@
 #include <QVariant>
 #include <QVector>
 #include <utility>
+#include "game_specific_terms.h"
 
 class CardDatabase;
 class CardInfo;
 class CardInfoPerSet;
 class CardSet;
-class CardRelation;
+//class CardRelation;
 class ICardDatabaseParser;
 
 typedef QMap<QString, QString> QStringMap;
@@ -158,28 +159,23 @@ private:
     QString pixmapCacheKey;
     // card text
     QString text;
+    // Is this a crypt card 'yellow'
+    bool isCrypt;
     // whether this is not a "real" card but a token
     bool isToken;
     // basic card properties; common for all the sets
     QVariantHash properties;
-    // the cards i'm related to
-    QList<CardRelation *> relatedCards;
-    // the card i'm reverse-related to
-    QList<CardRelation *> reverseRelatedCards;
-    // the cards thare are reverse-related to me
-    QList<CardRelation *> reverseRelatedCardsToMe;
     // card sets
     CardInfoPerSetMap sets;
     // cached set names
     QString setsNames;
     // positioning properties; used by UI
-    bool cipt;
     int tableRow;
-    bool upsideDownArt;
 
 public:
     explicit CardInfo(const QString &_name = QString(),
                       const QString &_text = QString(),
+                      bool _isCrypt = false,
                       bool _isToken = false,
                       QVariantHash _properties = QVariantHash(),
                       CardInfoPerSetMap _sets = CardInfoPerSetMap(),
@@ -188,6 +184,7 @@ public:
 
     static CardInfoPtr newInstance(const QString &_name = QString(),
                                    const QString &_text = QString(),
+                                   bool _isCrypt = false,
                                    bool _isToken = false,
                                    QVariantHash _properties = QVariantHash(),
                                    CardInfoPerSetMap _sets = CardInfoPerSetMap(),
@@ -222,10 +219,21 @@ public:
         emit cardInfoChanged(smartThis);
     }
 
+    bool getIsCrypt() const
+    {
+        return isCrypt;
+    }
+
     bool getIsToken() const
     {
         return isToken;
     }
+
+    QString getGroup() const
+    {
+        return getProperty(VTES::Group);
+    }
+
     const QStringList getProperties() const
     {
         return properties.keys();
@@ -239,6 +247,17 @@ public:
         properties.insert(_name, _value);
         emit cardInfoChanged(smartThis);
     }
+    const QStringList getPropertyList(const QString &propertyName) const
+    {
+        return properties.value(propertyName).toStringList();
+    }
+    void setPropertyList(const QString &_name, const QStringList &_values)
+    {
+        properties.insert(_name, _values);
+        emit cardInfoChanged(smartThis);
+    }
+
+
     bool hasProperty(const QString &propertyName) const
     {
         return properties.contains(propertyName);
@@ -266,37 +285,7 @@ public:
         emit cardInfoChanged(smartThis);
     }
 
-    // related cards
-    const QList<CardRelation *> &getRelatedCards() const
-    {
-        return relatedCards;
-    }
-    const QList<CardRelation *> &getReverseRelatedCards() const
-    {
-        return reverseRelatedCards;
-    }
-    const QList<CardRelation *> &getReverseRelatedCards2Me() const
-    {
-        return reverseRelatedCardsToMe;
-    }
-    const QList<CardRelation *> getAllRelatedCards() const
-    {
-        QList<CardRelation *> result;
-        result.append(getRelatedCards());
-        result.append(getReverseRelatedCards2Me());
-        return result;
-    }
-    void resetReverseRelatedCards2Me();
-    void addReverseRelatedCards2Me(CardRelation *cardRelation)
-    {
-        reverseRelatedCardsToMe.append(cardRelation);
-    }
-
     // positioning
-    bool getCipt() const
-    { /* Comes into Play Tapped */
-        return cipt;
-    }
     int getTableRow() const
     {
         return tableRow;
@@ -305,27 +294,25 @@ public:
     {
         tableRow = _tableRow;
     }
-    bool getUpsideDownArt() const
-    {
-        return upsideDownArt;
-    }
-    const QChar getColorChar() const;
 
     // Back-compatibility methods. Remove ASAP
-    const QString getCardType() const;
-    void setCardType(const QString &value);
-    const QString getCmc() const;
-    const QString getColors() const;
-    void setColors(const QString &value);
-    const QString getLoyalty() const;
+    const QList<QString> getCardTypes() const;
+    void setCardTypes(const QStringList &values);
+    const QString getCapacity() const;
+    const QString getPool() const;
+    const QString getBlood() const;
     const QString getMainCardType() const;
-    const QString getManaCost() const;
-    const QString getPowTough() const;
-    void setPowTough(const QString &value);
+    const QList<QString> getClans() const;
+
 
     // methods using per-set properties
-    QString getCustomPicURL(const QString &set) const
+    QString getPicURL(const QString &set) const
     {
+        if (set == nullptr) {
+            return getProperty("picurl");
+        }
+        // Todo; this should be deadcode.
+        qDebug() << "This should never be shown";
         return getSetProperty(set, "picurl");
     }
     QString getCorrectedName() const;
@@ -441,7 +428,7 @@ signals:
     void cardRemoved(CardInfoPtr card);
 };
 
-class CardRelation : public QObject
+/*class CardRelation : public QObject
 {
     Q_OBJECT
 private:
@@ -489,4 +476,6 @@ public:
         return isPersistent;
     }
 };
+*/
+
 #endif

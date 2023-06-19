@@ -39,13 +39,13 @@ DlgEditTokens::DlgEditTokens(QWidget *parent) : QDialog(parent), currentCard(nul
     colorEdit->addItem(tr("multicolor"), QChar('m'));
     colorEdit->addItem(tr("colorless"), QChar());
     colorLabel->setBuddy(colorEdit);
-    connect(colorEdit, SIGNAL(currentIndexChanged(int)), this, SLOT(colorChanged(int)));
+    // connect(colorEdit, SIGNAL(currentIndexChanged(int)), this, SLOT(colorChanged(int)));
 
     ptLabel = new QLabel(tr("&P/T:"));
     ptEdit = new QLineEdit;
     ptEdit->setMaxLength(MAX_NAME_LENGTH);
     ptLabel->setBuddy(ptEdit);
-    connect(ptEdit, SIGNAL(textChanged(QString)), this, SLOT(ptChanged(QString)));
+    // connect(ptEdit, SIGNAL(textChanged(QString)), this, SLOT(ptChanged(QString)));
 
     annotationLabel = new QLabel(tr("&Annotation:"));
     annotationEdit = new QLineEdit;
@@ -132,9 +132,9 @@ void DlgEditTokens::tokenSelectionChanged(const QModelIndex &current, const QMod
 
     if (currentCard) {
         nameEdit->setText(currentCard->getName());
-        const QChar cardColor = currentCard->getColorChar();
-        colorEdit->setCurrentIndex(colorEdit->findData(cardColor, Qt::UserRole, Qt::MatchFixedString));
-        ptEdit->setText(currentCard->getPowTough());
+        //const QChar cardColor = currentCard->getColorChar();
+        //colorEdit->setCurrentIndex(colorEdit->findData(cardColor, Qt::UserRole, Qt::MatchFixedString));
+        // ptEdit->setText(currentCard->getPowTough());
         annotationEdit->setText(currentCard->getText());
     } else {
         nameEdit->setText("");
@@ -163,8 +163,8 @@ void DlgEditTokens::actAddToken()
     QString setName = CardDatabase::TOKENS_SETNAME;
     CardInfoPerSetMap sets;
     sets.insert(setName, CardInfoPerSet(databaseModel->getDatabase()->getSet(setName)));
-    CardInfoPtr card = CardInfo::newInstance(name, "", true, QVariantHash(), sets, -1);
-    card->setCardType("Token");
+    CardInfoPtr card = CardInfo::newInstance(name, "", false, true, QVariantHash(), sets, -1);
+    card->setCardTypes({"Token"});
 
     databaseModel->getDatabase()->addCard(card);
 }
@@ -178,17 +178,12 @@ void DlgEditTokens::actRemoveToken()
     }
 }
 
-void DlgEditTokens::colorChanged(int colorIndex)
-{
-    if (currentCard)
-        currentCard->setColors(QString(colorEdit->itemData(colorIndex).toChar()));
-}
-
-void DlgEditTokens::ptChanged(const QString &_pt)
-{
-    if (currentCard)
-        currentCard->setPowTough(_pt);
-}
+// Todo; dunno what this is yet. But I might want this for blood / cap
+// void DlgEditTokens::ptChanged(const QString &_pt)
+// {
+//     if (currentCard)
+//         currentCard->setPowTough(_pt);
+// }
 
 void DlgEditTokens::annotationChanged(const QString &_annotation)
 {

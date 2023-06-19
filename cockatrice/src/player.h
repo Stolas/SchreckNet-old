@@ -195,21 +195,21 @@ private slots:
     void actOpenDeckInDeckEditor();
     void actCreatePredefinedToken();
     void actCreateRelatedCard();
-    void actCreateAllRelatedCards();
+    // void actCreateAllRelatedCards();
     void cardMenuAction();
     void actMoveCardXCardsFromTop();
     void actCardCounterTrigger();
     void actAttach();
     void actUnattach();
     void actDrawArrow();
-    void actIncPT(int deltaP, int deltaT);
+    void actIncBlood(int deltaP, int deltaT);
     void actResetPT();
-    void actSetPT();
+    void actSetBlood();
     void actIncP();
     void actDecP();
     void actIncT();
     void actDecT();
-    void actIncPT();
+    void actIncBlood();
     void actDecPT();
     void actFlowP();
     void actFlowT();
@@ -283,12 +283,10 @@ private:
                            CardAttribute attribute,
                            const QString &avalue,
                            bool allCards);
-    void addRelatedCardActions(const CardItem *card, QMenu *cardMenu);
     void addRelatedCardView(const CardItem *card, QMenu *cardMenu);
     void
     createCard(const CardItem *sourceCard, const QString &dbCardName, bool attach = false, bool persistent = false);
     void createAttachedCard(const CardItem *sourceCard, const QString &dbCardName, bool persistent = false);
-    bool createRelatedFromRelation(const CardItem *sourceCard, const CardRelation *cardRelation);
 
     QRectF bRect;
 

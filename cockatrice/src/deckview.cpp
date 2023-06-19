@@ -211,13 +211,13 @@ void DeckViewCardContainer::paint(QPainter *painter, const QStyleOptionGraphicsI
 void DeckViewCardContainer::addCard(DeckViewCard *card)
 {
     cards.append(card);
-    cardsByType.insert(card->getInfo() ? card->getInfo()->getMainCardType() : "", card);
+    cardsByType.insert(card->getInfo() ? card->getInfo()->getCardTypes().join(", ") : "", card);
 }
 
 void DeckViewCardContainer::removeCard(DeckViewCard *card)
 {
     cards.removeOne(card);
-    cardsByType.remove(card->getInfo() ? card->getInfo()->getMainCardType() : "", card);
+    cardsByType.remove(card->getInfo() ? card->getInfo()->getCardTypes().join(", ") : "", card);
 }
 
 QList<QPair<int, int>> DeckViewCardContainer::getRowsAndCols() const

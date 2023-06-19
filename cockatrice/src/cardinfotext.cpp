@@ -43,21 +43,9 @@ void CardInfoText::setCard(CardInfoPtr card)
     for (const QString &key : cardProps) {
         if (key.contains("-"))
             continue;
-        QString keyText = Mtg::getNicePropertyName(key).toHtmlEscaped() + ":";
+        QString keyText = VTES::getNicePropertyName(key).toHtmlEscaped() + ":";
         text +=
             QString("<tr><td>%1</td><td></td><td>%2</td></tr>").arg(keyText, card->getProperty(key).toHtmlEscaped());
-    }
-
-    auto relatedCards = card->getAllRelatedCards();
-    if (!relatedCards.empty()) {
-        text += QString("<tr><td>%1</td><td width=\"5\"></td><td>").arg(tr("Related cards:"));
-
-        for (auto *relatedCard : relatedCards) {
-            QString tmp = relatedCard->getName().toHtmlEscaped();
-            text += "<a href=\"" + tmp + "\">" + tmp + "</a><br>";
-        }
-
-        text += "</td></tr>";
     }
 
     text += "</table>";

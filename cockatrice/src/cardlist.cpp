@@ -46,8 +46,8 @@ public:
     inline bool operator()(CardItem *a, CardItem *b) const
     {
         if (flags & SortByType) {
-            QString t1 = a->getInfo() ? a->getInfo()->getMainCardType() : QString();
-            QString t2 = b->getInfo() ? b->getInfo()->getMainCardType() : QString();
+            QString t1 = a->getInfo() ? a->getInfo()->getCardTypes().join(", ") : QString();
+            QString t2 = b->getInfo() ? b->getInfo()->getCardTypes().join(", ") : QString();
             if ((t1 == t2) && (flags & SortByName))
                 return a->getName() < b->getName();
             return t1 < t2;

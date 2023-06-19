@@ -26,7 +26,7 @@ private:
     bool attacking;
     QMap<int, int> counters;
     QString annotation;
-    QString pt;
+    QString blood;
     bool destroyOnZoneChange;
     bool doesntUntap;
     QPoint gridPoint;
@@ -107,11 +107,11 @@ public:
         return doesntUntap;
     }
     void setDoesntUntap(bool _doesntUntap);
-    QString getPT() const
+    QString getBlood() const
     {
-        return pt;
+        return blood;
     }
-    void setPT(const QString &_pt);
+    void setBlood(const QString &_blood);
     bool getDestroyOnZoneChange() const
     {
         return destroyOnZoneChange;

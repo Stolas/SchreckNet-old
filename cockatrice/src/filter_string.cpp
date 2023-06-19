@@ -92,7 +92,8 @@ static void setupParserRules()
     };
     search["TypeQuery"] = [](const peg::SemanticValues &sv) -> Filter {
         StringMatcher matcher = sv[0].get<StringMatcher>();
-        return [=](CardData x) -> bool { return matcher(x->getCardType()); };
+        return false;
+        //return [=](CardData x) -> bool { return matcher(x->getCardType()); };
     };
     search["SetQuery"] = [](const peg::SemanticValues &sv) -> Filter {
         StringMatcher matcher = sv[0].get<StringMatcher>();
@@ -249,68 +250,69 @@ static void setupParserRules()
         return [=](CardData x) { return matcher(x->getText()); };
     };
 
-    search["ColorQuery"] = [](const peg::SemanticValues &sv) -> Filter {
-        QString parts;
-        for (int i = 0; i < static_cast<int>(sv.size()); ++i) {
-            parts += sv[i].get<char>();
-        }
-        bool idenity = sv.tokens[0].first[0] != 'i';
-        if (sv.tokens[1].first[0] == ':') {
-            return [=](CardData x) {
-                QString match = idenity ? x->getColors() : x->getProperty("coloridentity");
-                if (parts.contains("m") && match.length() < 2) {
-                    return false;
-                } else if (parts == "m") {
-                    return true;
-                }
+    // search["ColorQuery"] = [](const peg::SemanticValues &sv) -> Filter {
+    //     QString parts;
+    //     for (int i = 0; i < static_cast<int>(sv.size()); ++i) {
+    //         parts += sv[i].get<char>();
+    //     }
+    //     bool idenity = sv.tokens[0].first[0] != 'i';
+    //     if (sv.tokens[1].first[0] == ':') {
+    //         return [=](CardData x) {
+    //             QString match = idenity ? x->getColors() : x->getProperty("coloridentity");
+    //             if (parts.contains("m") && match.length() < 2) {
+    //                 return false;
+    //             } else if (parts == "m") {
+    //                 return true;
+    //             }
 
-                if (parts.contains("c") && match.length() == 0)
-                    return true;
+    //             if (parts.contains("c") && match.length() == 0)
+    //                 return true;
 
-                for (const auto &i : match) {
-                    if (parts.contains(i))
-                        return true;
-                }
-                return false;
-            };
-        } else {
-            return [=](CardData x) {
-                QString match = idenity ? x->getColors() : x->getProperty("colorIdentity");
-                if (parts.contains("m") && match.length() < 2)
-                    return false;
+    //             for (const auto &i : match) {
+    //                 if (parts.contains(i))
+    //                     return true;
+    //             }
+    //             return false;
+    //         };
+    //     } else {
+    //         return [=](CardData x) {
+    //             QString match = idenity ? x->getColors() : x->getProperty("colorIdentity");
+    //             if (parts.contains("m") && match.length() < 2)
+    //                 return false;
 
-                if (parts.contains("c") && match.length() != 0)
-                    return false;
+    //             if (parts.contains("c") && match.length() != 0)
+    //                 return false;
 
-                for (const auto &part : parts) {
-                    if (!match.contains(part))
-                        return false;
-                }
+    //             for (const auto &part : parts) {
+    //                 if (!match.contains(part))
+    //                     return false;
+    //             }
 
-                for (const auto &i : match) {
-                    if (!parts.contains(i))
-                        return false;
-                }
-                return true;
-            };
-        }
-    };
+    //             for (const auto &i : match) {
+    //                 if (!parts.contains(i))
+    //                     return false;
+    //             }
+    //             return true;
+    //         };
+    //     }
+    // };
 
-    search["CMCQuery"] = [](const peg::SemanticValues &sv) -> Filter {
-        NumberMatcher matcher = sv[0].get<NumberMatcher>();
-        return [=](CardData x) -> bool { return matcher(x->getProperty("cmc").toInt()); };
-    };
-    search["PowerQuery"] = [](const peg::SemanticValues &sv) -> Filter {
-        NumberMatcher matcher = sv[0].get<NumberMatcher>();
-        return [=](CardData x) -> bool { return matcher(x->getPowTough().split("/")[0].toInt()); };
-    };
-    search["ToughnessQuery"] = [](const peg::SemanticValues &sv) -> Filter {
-        NumberMatcher matcher = sv[0].get<NumberMatcher>();
-        return [=](CardData x) -> bool {
-            auto parts = x->getPowTough().split("/");
-            return matcher(parts.length() == 2 ? parts[1].toInt() : 0);
-        };
-    };
+    // search["CMCQuery"] = [](const peg::SemanticValues &sv) -> Filter {
+    //     NumberMatcher matcher = sv[0].get<NumberMatcher>();
+    //     return [=](CardData x) -> bool { return matcher(x->getProperty("cmc").toInt()); };
+    // };
+    // search["PowerQuery"] = [](const peg::SemanticValues &sv) -> Filter {
+    //     NumberMatcher matcher = sv[0].get<NumberMatcher>();
+    //     return true;
+    //     // return [=](CardData x) -> bool { return matcher(x->getPowTough().split("/")[0].toInt()); };
+    // };
+    // search["ToughnessQuery"] = [](const peg::SemanticValues &sv) -> Filter {
+    //     NumberMatcher matcher = sv[0].get<NumberMatcher>();
+    //     return [=](CardData x) -> bool {
+    //         // auto parts = x->getPowTough().split("/");
+    //         // return matcher(parts.length() == 2 ? parts[1].toInt() : 0);
+    //     };
+    // };
     search["FieldQuery"] = [](const peg::SemanticValues &sv) -> Filter {
         QString field = sv[0].get<QString>();
         if (sv.choice() == 0) {

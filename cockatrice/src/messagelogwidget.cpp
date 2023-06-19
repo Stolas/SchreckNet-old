@@ -678,14 +678,14 @@ void MessageLogWidget::logSetPT(Player *player, CardItem *card, QString newPT)
     if (newPT.isEmpty()) {
         appendHtmlServerMessage(tr("%1 removes the PT of %2.").arg(playerName).arg(name));
     } else {
-        QString oldPT = card->getPT();
-        if (oldPT.isEmpty()) {
-            appendHtmlServerMessage(
-                tr("%1 changes the PT of %2 from nothing to %4.").arg(playerName).arg(name).arg(newPT));
-        } else {
-            appendHtmlServerMessage(
-                tr("%1 changes the PT of %2 from %3 to %4.").arg(playerName).arg(name).arg(oldPT).arg(newPT));
-        }
+        // QString oldPT = card->getBlood();
+        // if (oldPT.isEmpty()) {
+        //     appendHtmlServerMessage(
+        //         tr("%1 changes the PT of %2 from nothing to %4.").arg(playerName).arg(name).arg(newPT));
+        // } else {
+        //     appendHtmlServerMessage(
+        //         tr("%1 changes the PT of %2 from %3 to %4.").arg(playerName).arg(name).arg(oldPT).arg(newPT));
+        // }
     }
 }
 

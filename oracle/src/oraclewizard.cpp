@@ -26,9 +26,8 @@
 #include <QtConcurrent>
 #include <QtGui>
 
-#define MTGJSON_VERSION_URL "https://www.mtgjson.com/api/v5/Meta.json"
-
-#define ALLSETS_URL "https://static.krcg.org/data/vtes.json"
+//#define MTGJSON_VERSION_URL "https://www.mtgjson.com/api/v5/Meta.json"
+#define VTES_CARDDB_URL "https://static.krcg.org/data/vtes.json"
 
 OracleWizard::OracleWizard(QWidget *parent) : QWizard(parent)
 {
@@ -44,8 +43,8 @@ OracleWizard::OracleWizard(QWidget *parent) : QWizard(parent)
 
     if (!isSpoilersOnly) {
         addPage(new IntroPage);
-        addPage(new LoadSetsPage);
-        addPage(new SaveSetsPage);
+        addPage(new LoadCardsPage);
+        addPage(new SaveCardsPage);
         addPage(new OutroPage);
     } else {
         addPage(new OutroPage);
@@ -171,7 +170,7 @@ void OutroPage::retranslateUi()
                 tr("If the card databases don't reload automatically, restart the SchreckNet client."));
 }
 
-LoadSetsPage::LoadSetsPage(QWidget *parent) : OracleWizardPage(parent)
+LoadCardsPage::LoadCardsPage(QWidget *parent) : OracleWizardPage(parent)
 {
     urlRadioButton = new QRadioButton(this);
     fileRadioButton = new QRadioButton(this);
@@ -205,15 +204,15 @@ LoadSetsPage::LoadSetsPage(QWidget *parent) : OracleWizardPage(parent)
     setLayout(layout);
 }
 
-void LoadSetsPage::initializePage()
+void LoadCardsPage::initializePage()
 {
-    urlLineEdit->setText(wizard()->settings->value("allsetsurl", ALLSETS_URL).toString());
+    urlLineEdit->setText(wizard()->settings->value("allsetsurl", VTES_CARDDB_URL).toString());
 
     progressLabel->hide();
     progressBar->hide();
 }
 
-void LoadSetsPage::retranslateUi()
+void LoadCardsPage::retranslateUi()
 {
     setTitle(tr("Source selection"));
     setSubTitle(tr("Please specify a compatible source for the list of sets and cards. "
@@ -226,12 +225,12 @@ void LoadSetsPage::retranslateUi()
     fileButton->setText(tr("Choose file..."));
 }
 
-void LoadSetsPage::actRestoreDefaultUrl()
+void LoadCardsPage::actRestoreDefaultUrl()
 {
-    urlLineEdit->setText(ALLSETS_URL);
+    urlLineEdit->setText(VTES_CARDDB_URL);
 }
 
-void LoadSetsPage::actLoadSetsFile()
+void LoadCardsPage::actLoadSetsFile()
 {
     QFileDialog dialog(this, tr("Load sets file"));
     dialog.setFileMode(QFileDialog::ExistingFile);
@@ -250,7 +249,7 @@ void LoadSetsPage::actLoadSetsFile()
     fileLineEdit->setText(dialog.selectedFiles().at(0));
 }
 
-bool LoadSetsPage::validatePage()
+bool LoadCardsPage::validatePage()
 {
     // once the import is finished, we call next(); skip validation
     if (wizard()->importer->getAllCards().size() > 0) {
@@ -296,7 +295,6 @@ bool LoadSetsPage::validatePage()
         wizard()->setCardSourceUrl(setsFile.fileName());
         wizard()->setCardSourceVersion("unknown");
 
-        qDebug() << "3";
         readJsonFromByteArray(setsFile.readAll());
     }
 
@@ -304,44 +302,45 @@ bool LoadSetsPage::validatePage()
 }
 
 #include <iostream>
-void LoadSetsPage::downloadSetsFile(const QUrl &url)
+void LoadCardsPage::downloadSetsFile(const QUrl &url)
 {
     wizard()->setCardSourceVersion("unknown");
 
-    const auto urlString = url.toString();
-    if (urlString == ALLSETS_URL) {
-        const auto versionUrl = QUrl::fromUserInput(MTGJSON_VERSION_URL);
-        auto *versionReply = wizard()->nam->get(QNetworkRequest(versionUrl));
-        connect(versionReply, &QNetworkReply::finished, [this, versionReply]() {
-            if (versionReply->error() == QNetworkReply::NoError) {
-                auto jsonData = versionReply->readAll();
-                QJsonParseError jsonError{};
-                auto jsonResponse = QJsonDocument::fromJson(jsonData, &jsonError);
+    // const auto urlString = url.toString();
+    // if (urlString == VTES_CARDDB_URL) {
+    //     const auto versionUrl = QUrl::fromUserInput(MTGJSON_VERSION_URL);
+    //     auto *versionReply = wizard()->nam->get(QNetworkRequest(versionUrl));
+    //     connect(versionReply, &QNetworkReply::finished, [this, versionReply]() {
+    //         if (versionReply->error() == QNetworkReply::NoError) {
+    //             auto jsonData = versionReply->readAll();
+    //             QJsonParseError jsonError{};
+    //             auto jsonResponse = QJsonDocument::fromJson(jsonData, &jsonError);
 
-                if (jsonError.error == QJsonParseError::NoError) {
-                    const auto jsonMap = jsonResponse.toVariant().toMap();
+    //             if (jsonError.error == QJsonParseError::NoError) {
+    //                 const auto jsonMap = jsonResponse.toVariant().toMap();
 
-                    auto versionString = jsonMap.value("meta").toMap().value("version").toString();
-                    if (versionString.isEmpty()) {
-                        versionString = "unknown";
-                    }
-                    wizard()->setCardSourceVersion(versionString);
-                }
-            }
+    //                 auto versionString = jsonMap.value("meta").toMap().value("version").toString();
+    //                 if (versionString.isEmpty()) {
+    //                     versionString = "unknown";
+    //                 }
+    //                 wizard()->setCardSourceVersion(versionString);
+    //             }
+    //         }
 
-            versionReply->deleteLater();
-        });
-    }
+    //         versionReply->deleteLater();
+    //     });
+    // }
 
     wizard()->setCardSourceUrl(url.toString());
 
+    //qDebug() << url.toString();
     auto *reply = wizard()->nam->get(QNetworkRequest(url));
 
     connect(reply, SIGNAL(finished()), this, SLOT(actDownloadFinishedSetsFile()));
     connect(reply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(actDownloadProgressSetsFile(qint64, qint64)));
 }
 
-void LoadSetsPage::actDownloadProgressSetsFile(qint64 received, qint64 total)
+void LoadCardsPage::actDownloadProgressSetsFile(qint64 received, qint64 total)
 {
     if (total > 0) {
         progressBar->setMaximum(static_cast<int>(total));
@@ -350,7 +349,7 @@ void LoadSetsPage::actDownloadProgressSetsFile(qint64 received, qint64 total)
     progressLabel->setText(tr("Downloading (%1MiB)").arg((int)received / (1024 * 1024)));
 }
 
-void LoadSetsPage::actDownloadFinishedSetsFile()
+void LoadCardsPage::actDownloadFinishedSetsFile()
 {
     // check for a reply
     auto *reply = dynamic_cast<QNetworkReply *>(sender());
@@ -378,17 +377,19 @@ void LoadSetsPage::actDownloadFinishedSetsFile()
     progressBar->hide();
 
     // save AllPrintings.json url, but only if the user customized it and download was successful
-    if (urlLineEdit->text() != QString(ALLSETS_URL)) {
+    if (urlLineEdit->text() != QString(VTES_CARDDB_URL)) {
         wizard()->settings->setValue("allsetsurl", urlLineEdit->text());
     } else {
         wizard()->settings->remove("allsetsurl");
     }
 
-    readJsonFromByteArray(reply->readAll());
+    auto data = reply->readAll();
+    qDebug() << data;
+    readJsonFromByteArray(data);
     reply->deleteLater();
 }
 
-void LoadSetsPage::readJsonFromByteArray(QByteArray data)
+void LoadCardsPage::readJsonFromByteArray(QByteArray data)
 {
     // show an infinite progressbar
     progressBar->setMaximum(0);
@@ -399,14 +400,14 @@ void LoadSetsPage::readJsonFromByteArray(QByteArray data)
     progressBar->show();
 
     // Start the computation.
-    future = QtConcurrent::run([this, &data] {
-        qDebug() << QString(data);
+    future = QtConcurrent::run([this, data] {
+        // qDebug() << QString(data);
         return wizard()->importer->readJsonFromByteArray(data);
     });
     watcher.setFuture(future);
 }
 
-void LoadSetsPage::importFinished()
+void LoadCardsPage::importFinished()
 {
     wizard()->enableButtons();
     setEnabled(true);
@@ -421,7 +422,7 @@ void LoadSetsPage::importFinished()
     }
 }
 
-SaveSetsPage::SaveSetsPage(QWidget *parent) : OracleWizardPage(parent)
+SaveCardsPage::SaveCardsPage(QWidget *parent) : OracleWizardPage(parent)
 {
     pathLabel = new QLabel(this);
     saveLabel = new QLabel(this);
@@ -440,28 +441,28 @@ SaveSetsPage::SaveSetsPage(QWidget *parent) : OracleWizardPage(parent)
     setLayout(layout);
 }
 
-void SaveSetsPage::cleanupPage()
+void SaveCardsPage::cleanupPage()
 {
     wizard()->importer->clear();
-    disconnect(wizard()->importer, SIGNAL(setIndexChanged(int, int, const QString &)), nullptr, nullptr);
+    disconnect(wizard()->importer, SIGNAL(cardIndexChanged(int, const QString &)), nullptr, nullptr);
 }
 
-void SaveSetsPage::initializePage()
+void SaveCardsPage::initializePage()
 {
     messageLog->clear();
 
-    connect(wizard()->importer, SIGNAL(setIndexChanged(int, int, const QString &)), this,
-            SLOT(updateTotalProgress(int, int, const QString &)));
+    connect(wizard()->importer, SIGNAL(cardIndexChanged(int, const QString &)), this,
+            SLOT(updateTotalProgress(int, const QString &)));
 
     if (!wizard()->importer->startImport()) {
         QMessageBox::critical(this, tr("Error"), tr("No set has been imported."));
     }
 }
 
-void SaveSetsPage::retranslateUi()
+void SaveCardsPage::retranslateUi()
 {
-    setTitle(tr("Sets imported"));
-    setSubTitle(tr("The following sets have been found:"));
+    setTitle(tr("Cards imported"));
+    setSubTitle(tr("The following cards have been found:"));
 
     saveLabel->setText(tr("Press \"Save\" to store the imported cards in the SchreckNet database."));
     pathLabel->setText(tr("The card database will be saved at the following location:") + "<br>" +
@@ -471,19 +472,19 @@ void SaveSetsPage::retranslateUi()
     setButtonText(QWizard::NextButton, tr("&Save"));
 }
 
-void SaveSetsPage::updateTotalProgress(int cardsImported, int /* setIndex */, const QString &setName)
+void SaveCardsPage::updateTotalProgress(int /* cardIndex */, const QString &cardName)
 {
-    if (setName.isEmpty()) {
+    if (cardName.isEmpty()) {
         messageLog->append("<b>" + tr("Import finished: %1 cards.").arg(wizard()->importer->getCardList().size()) +
                            "</b>");
     } else {
-        messageLog->append(tr("%1: %2 cards imported").arg(setName).arg(cardsImported));
+        messageLog->append(tr("%1: card imported").arg(cardName));
     }
 
     messageLog->verticalScrollBar()->setValue(messageLog->verticalScrollBar()->maximum());
 }
 
-bool SaveSetsPage::validatePage()
+bool SaveCardsPage::validatePage()
 {
     QString defaultPath = SettingsCache::instance().getCardDatabasePath();
     QString windowName = tr("Save card database");

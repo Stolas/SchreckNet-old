@@ -228,7 +228,7 @@ void DeckLoader::saveToStream_DeckZone(QTextStream &out, const InnerDecklistNode
         auto *card = dynamic_cast<DecklistCardNode *>(zoneNode->at(j));
 
         CardInfoPtr info = db->getCard(card->getName());
-        QString cardType = info ? info->getMainCardType() : "unknown";
+        QString cardType = info ? info->getCardTypes().join(", ") : "unknown";
 
         cardsByType.insert(cardType, card);
 

@@ -35,6 +35,10 @@ int CardDatabaseModel::columnCount(const QModelIndex & /*parent*/) const
 
 QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
 {
+
+    return QVariant();
+
+    /*
     if (!index.isValid() || index.row() >= cardList.size() || index.column() >= CARDDBMODEL_COLUMNS ||
         (role != Qt::DisplayRole && role != SortRole))
         return QVariant();
@@ -57,10 +61,12 @@ QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
         default:
             return QVariant();
     }
+    */
 }
 
 QVariant CardDatabaseModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    /*
     if (role != Qt::DisplayRole)
         return QVariant();
     if (orientation != Qt::Horizontal)
@@ -81,6 +87,8 @@ QVariant CardDatabaseModel::headerData(int section, Qt::Orientation orientation,
         default:
             return QVariant();
     }
+    */
+    return QVariant();
 }
 
 void CardDatabaseModel::cardInfoChanged(CardInfoPtr card)

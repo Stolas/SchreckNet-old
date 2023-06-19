@@ -69,7 +69,7 @@ QString Server_Card::setAttribute(CardAttribute attribute, const QString &avalue
             break;
         case AttrPT:
             setPT(avalue);
-            return getPT();
+            return getBlood();
         case AttrAnnotation:
             setAnnotation(avalue);
             break;

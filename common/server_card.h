@@ -103,7 +103,7 @@ public:
     {
         return color;
     }
-    QString getPT() const
+    QString getBlood() const
     {
         return ptString;
     }

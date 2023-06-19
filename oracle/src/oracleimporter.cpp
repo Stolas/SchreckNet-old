@@ -1,4 +1,5 @@
 #include "oracleimporter.h"
+#include "game_specific_terms.h"
 
 #include "carddbparser/schrecknetxml.h"
 
@@ -12,6 +13,7 @@ OracleImporter::OracleImporter(const QString &_dataDir, QObject *parent) : CardD
 
 bool OracleImporter::readJsonFromByteArray(const QByteArray &data)
 {
+    qDebug() << QString(*data);
     auto jsonDoc = QJsonDocument::fromJson(data);
     if (jsonDoc.isNull()) {
         qDebug() << "error: failed to parse JSON";
@@ -38,86 +40,69 @@ QString OracleImporter::getMainCardType(const QStringList &typeList)
     return typeList.first();
 }
 
-CardInfoPtr OracleImporter::addCard(QString name,
+CardInfoPtr OracleImporter::addCard(QString id,
+                                    bool isCrypt,
+                                    QString name,
+                                    QString picture_url,
                                     QString text,
-                                    bool isToken,
                                     QVariantHash properties,
-                                    CardInfoPerSet setInfo)
+                                    bool isToken)
 {
     // Workaround for card name weirdness
     qDebug() << "Importing card: " << name;
-    name = name.replace("Æ", "AE");
-    name = name.replace("’", "'");
-    if (cards.contains(name)) {
-        CardInfoPtr card = cards.value(name);
-        card->addToSet(setInfo.getPtr(), setInfo);
-        return card;
-    }
-
-    // Remove {} around mana costs, except if it's split cost
-    QString manacost = properties.value("manacost").toString();
-    if (!manacost.isEmpty()) {
-        QStringList symbols = manacost.split("}");
-        QString formattedCardCost;
-        for (QString symbol : symbols) {
-            if (symbol.contains(QRegularExpression("[0-9WUBGRP]/[0-9WUBGRP]"))) {
-                symbol.append("}");
-            } else {
-                symbol.remove(QChar('{'));
-            }
-            formattedCardCost.append(symbol);
-        }
-        properties.insert("manacost", formattedCardCost);
-    }
-
-    // fix colors
-    QString allColors = properties.value("colors").toString();
-    if (allColors.size() > 1) {
-        sortAndReduceColors(allColors);
-        properties.insert("colors", allColors);
-    }
-    QString allColorIdent = properties.value("coloridentity").toString();
-    if (allColorIdent.size() > 1) {
-        sortAndReduceColors(allColorIdent);
-        properties.insert("coloridentity", allColorIdent);
-    }
-
-    // Todo; DETECT CARD POSITIONING INFO
-
-    // cards that enter the field tapped
-    bool cipt = text.contains(" it enters the battlefield tapped") ||
-                (text.contains(name + " enters the battlefield tapped") &&
-                 !text.contains(name + " enters the battlefield tapped unless"));
+    name = name.replace("(TM)", "™");
 
     // table row
     int tableRow = 1;
-    QString mainCardType = properties.value("maintype").toString();
-    if ((mainCardType == "Land"))
+    // Todo; Add row location for cards. [Crypt = 0, Master = 2 ?]
+
+
+    tableRow = 3;
+    if (isCrypt) {
         tableRow = 0;
-    else if ((mainCardType == "Sorcery") || (mainCardType == "Instant"))
-        tableRow = 3;
-    else if (mainCardType == "Creature")
-        tableRow = 2;
+    }
+    /*
+        Phoenix (He): The layout usually goes:
+        top: ready minions (vampires, allies)
+        top/bottom: master / event permanents
+        bottom: uncontrolled (face-down) and torpor (face-up)
+    */
 
-    // card side
-    QString side = properties.value("side").toString() == "b" ? "back" : "front";
-    properties.insert("side", side);
 
-    // upsideDown (flip cards)
-    QString layout = properties.value("layout").toString();
-    bool upsideDown = layout == "flip" && side == "back";
+    // for (auto &types : properties.value(VTES::CardTypes).toString()) {
+    //     if (type == "")
+    // 
+    // }
+    // if ((mainCardType == "Land"))
+    //     tableRow = 0;
+    // else if ((mainCardType == "Sorcery") || (mainCardType == "Instant"))
+    //     tableRow = 3;
+    // else if (mainCardType == "Creature")
+    //     tableRow = 2;
 
-    // insert the card and its properties
-    QList<CardRelation *> reverseRelatedCards;
-    CardInfoPerSetMap setsInfo;
-    setsInfo.insert(setInfo.getPtr()->getShortName(), setInfo);
-    CardInfoPtr newCard = CardInfo::newInstance(name, text, isToken, properties,
+
+    CardInfoPerSetMap setsInfo;// = CardInfoPerSetMap();
+    //setsInfo.insert(setInfo.getPtr()->getShortName(), setInfo);
+    auto sets = properties.value(VTES::Sets).toStringList();
+    qDebug() << sets;
+    // CardSet setInfo = CardSet::newInstance();
+    // setInfo.
+    //setInfo->
+    for (const auto &set : sets) {
+        auto instance = CardSet::newInstance(set, set);
+        setsInfo.insert(set, instance);
+    }
+
+    properties.insert("id", id);
+    properties.insert("picurl", picture_url);
+    CardInfoPtr newCard = CardInfo::newInstance(name, text, isCrypt, isToken, properties,
                                                 setsInfo, tableRow);
 
-    if (name.isEmpty()) {
-        qDebug() << "warning: an empty card was added to set" << setInfo.getPtr()->getShortName();
-    }
+    // if (name.isEmpty()) {
+    //     qDebug() << "warning: an empty card was added to set" << setInfo.getPtr()->getShortName();
+    // }
     cards.insert(name, newCard);
+    emit cardIndexChanged(id.toInt(), name);
 
     return newCard;
 }
@@ -127,23 +112,6 @@ QString OracleImporter::getStringPropertyFromMap(const QVariantMap &card, const 
     return card.contains(propertyName) ? card.value(propertyName).toString() : QString("");
 }
 
-void OracleImporter::sortAndReduceColors(QString &colors)
-{
-    // sort
-    const QHash<QChar, unsigned int> colorOrder{{'W', 0}, {'U', 1}, {'B', 2}, {'R', 3}, {'G', 4}};
-    std::sort(colors.begin(), colors.end(), [&colorOrder](const QChar a, const QChar b) {
-        return colorOrder.value(a, INT_MAX) < colorOrder.value(b, INT_MAX);
-    });
-    // reduce
-    QChar lastChar = '\0';
-    for (int i = 0; i < colors.size(); ++i) {
-        if (colors.at(i) == lastChar)
-            colors.remove(i, 1);
-        else
-            lastChar = colors.at(i);
-    }
-}
-
 int OracleImporter::startImport()
 {
     int numCards = 0;// setCards = 0, setIndex = 0;
@@ -151,51 +119,70 @@ int OracleImporter::startImport()
     QVariantHash properties;
     QString id;
     QString name;
-    QList<QVariant> sets;
     QString text;
+    QString picture_url;
 
     for (auto it : allCards) {
         //qDebug() << "Card " << it;
         auto obj = it.toObject();
-        qDebug() << "Object " << obj;
+        // qDebug() << "Object " << obj;
         auto types = obj["types"].toArray();
+        bool isCrypt;
 
         /* Uniform elements */
-        qDebug() << "Types " << types;
-        if (types.contains("vampire")) {
+        if (types.contains("Vampire") || types.contains("Imbued")) {
             /* Parse as Crypt Card */
-            properties["clan"] = obj["clans"].toString();
-            properties["capacity"] = obj["capacity"].toString();
-            properties["disciplines"] = obj["disciplines"].toString();
-            properties["group"] = obj["group"].toString();
+            isCrypt = true;
+            properties[VTES::Capacity] = obj["capacity"].toString();
+            properties[VTES::Disciplines] = obj["disciplines"].toVariant().toStringList();
+            properties[VTES::Group] = obj["group"].toString();
+            // properties["title"] = obj["title"].toString();
+            properties[VTES::Advanced] = obj["adv"].toBool();
         } else {
             /* Parse as Library Card */
-            properties["pool_cost"] = obj["pool_cost"].toString();
+            isCrypt = false;
+            properties[VTES::PoolCost] = obj["pool_cost"].toString();
+            properties[VTES::BloodCost] = obj["blood_cost"].toString();
         }
+
         id = obj["id"].toString();
         name = obj["_name"].toString();
-        // name = obj["name"].toString();
-        properties["picture_url"] = obj["url"].toString();
-        // set = obj["_set"].toString();
-        // sets = obj["sets"].toArray();
-        qDebug() << "Todo; sets";
-        // scans = obj["scans"].toString();
         text = obj["card_text"].toString();
-        // printed_name = obj["printed_name"].toString();
+        picture_url = obj["url"].toString();
 
-        // Add to list.
-        QList<CardRelation *> relatedCards;
-        CardInfoPerSet setInfo;
+        properties[VTES::Clans] = QJsonArray();
+        if (obj.contains("clans")) {
+            properties[VTES::Clans] = obj["clans"].toVariant().toStringList();
+        }
 
-        CardInfoPtr newCard = addCard(name, text, false, properties, setInfo);
+        // QJsonObject({"_name":"Hester Reed","_set":"BH:U2, POD:DTC","adv":null,"artists":["Rebecca Guay"],
+        //              "capacity":3,"card_text":"Sabbat.","clans":["Lasombra"],"disciplines":["obt","pot"],
+        //              "group":"3","id":200595,"name":"Hester Reed (G3)","name_variants":["Hester Reed"],
+        //              "ordered_sets":["Black Hand"],"printed_name":"Hester Reed",
+        //              "scans":{"Black Hand":"https://static.krcg.org/card/set/black-hand/hesterreedg3.jpg",
+        //              "Print on Demand":"https://static.krcg.org/card/set/print-on-demand/hesterreedg3.jpg"},
+        //              "sets":{"Black Hand":[{"frequency":2,"rarity":"Uncommon","release_date":"2003-11-17"}],
+        //               "Print on Demand":[{"copies":1,"precon":"DriveThruCards"}]},
+        //               "types":["Vampire"],"url":"https://static.krcg.org/card/hesterreedg3.jpg"})
+
+        properties[VTES::CardTypes] = obj["types"].toVariant().toStringList();
+         //.toVariant().toStringList();
+
+        QStringList setList = QStringList();
+        auto setsObj = obj["sets"].toObject();
+        for (auto &key : setsObj.keys()) {
+            setList.append(key);
+        }
+        properties[VTES::Sets] = setList;
+        CardInfoPtr newCard = addCard(id, isCrypt, name, picture_url, text, properties, false);
         numCards++;
     }
 
-    // Todo; Add 'the edge' token.
-    // add an empty set for tokens
-    // CardSetPtr tokenSet = CardSet::newInstance(TOKENS_SETNAME, tr("Dummy set containing tokens"), "Tokens");
-    // sets.insert(TOKENS_SETNAME, tokenSet);
-    qDebug() << "Added all cards, now add 'the Edge'.";
+    // Todo; set picture_url for the Edge.
+    addCard(id, false, "The Edge", picture_url,
+            "Gain control of the Edge after a successful bleed\nBurn the Edge during a referendum to gain 1 vote\nIf "
+            "you control the Edge during your unlock phase, you may gain 1 pool from the Blood Bank.\n",
+            QVariantHash(), true);
 
 
     return numCards;
