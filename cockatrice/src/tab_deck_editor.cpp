@@ -429,23 +429,23 @@ void TabDeckEditor::createCentralFrame()
 
     searchEdit->setTreeView(databaseView);
 
-    aAddCard = new QAction(QString(), this);
-    aAddCard->setIcon(QPixmap("theme:icons/arrow_right_green"));
-    connect(aAddCard, SIGNAL(triggered()), this, SLOT(actAddCard()));
-    auto *tbAddCard = new QToolButton(this);
-    tbAddCard->setDefaultAction(aAddCard);
-
     aAddCardToSideboard = new QAction(QString(), this);
     aAddCardToSideboard->setIcon(QPixmap("theme:icons/arrow_right_blue"));
     connect(aAddCardToSideboard, SIGNAL(triggered()), this, SLOT(actAddCardToSideboard()));
     auto *tbAddCardToSideboard = new QToolButton(this);
     tbAddCardToSideboard->setDefaultAction(aAddCardToSideboard);
 
+    aAddCard = new QAction(QString(), this);
+    aAddCard->setIcon(QPixmap("theme:icons/arrow_right_green"));
+    connect(aAddCard, SIGNAL(triggered()), this, SLOT(actAddCard()));
+    auto *tbAddCard = new QToolButton(this);
+    tbAddCard->setDefaultAction(aAddCard);
+
     searchLayout = new QHBoxLayout;
     searchLayout->setObjectName("searchLayout");
     searchLayout->addWidget(searchEdit);
-    searchLayout->addWidget(tbAddCard);
     searchLayout->addWidget(tbAddCardToSideboard);
+    searchLayout->addWidget(tbAddCard);
 
     centralFrame = new QVBoxLayout;
     centralFrame->setObjectName("centralFrame");
@@ -466,10 +466,10 @@ void TabDeckEditor::databaseCustomMenu(QPoint point)
 
     // add to deck and sideboard options
     QAction *addToDeck, *addToSideboard;
-    addToDeck = menu.addAction(tr("Add to Deck"));
-    addToSideboard = menu.addAction(tr("Add to Sideboard"));
-    connect(addToDeck, SIGNAL(triggered()), this, SLOT(actAddCard()));
+    addToSideboard = menu.addAction(tr("Add to Crypt"));
+    addToDeck = menu.addAction(tr("Add to Library"));
     connect(addToSideboard, SIGNAL(triggered()), this, SLOT(actAddCardToSideboard()));
+    connect(addToDeck, SIGNAL(triggered()), this, SLOT(actAddCard()));
 
     menu.exec(databaseView->mapToGlobal(point));
 }
@@ -637,8 +637,8 @@ void TabDeckEditor::retranslateUi()
 
     aClose->setText(tr("&Close"));
 
+    aAddCardToSideboard->setText(tr("Add card to &crypt"));
     aAddCard->setText(tr("Add card to &maindeck"));
-    aAddCardToSideboard->setText(tr("Add card to &sideboard"));
 
     aRemoveCard->setText(tr("&Remove row"));
 

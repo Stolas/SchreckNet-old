@@ -35,10 +35,6 @@ int CardDatabaseModel::columnCount(const QModelIndex & /*parent*/) const
 
 QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
 {
-
-    return QVariant();
-
-    /*
     if (!index.isValid() || index.row() >= cardList.size() || index.column() >= CARDDBMODEL_COLUMNS ||
         (role != Qt::DisplayRole && role != SortRole))
         return QVariant();
@@ -47,26 +43,28 @@ QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
     switch (index.column()) {
         case NameColumn:
             return card->getName();
-        case SetListColumn:
-            return card->getSetsNames();
-        case ManaCostColumn:
-            return role == SortRole ? QString("%1%2").arg(card->getCmc(), 4, QChar('0')).arg(card->getManaCost())
-                                    : card->getManaCost();
-        case CardTypeColumn:
-            return card->getCardType();
-        case PTColumn:
-            return card->getPowTough();
-        case ColorColumn:
-            return card->getColors();
+        case DisclipesColumn:
+        case CapacityColumn:
+        case ClanColumn:
+        case GroupColumn:
+        // case SetListColumn:
+        //     return card->getSetsNames();
+        // case ManaCostColumn:
+        //     return role == SortRole ? QString("%1%2").arg(card->getCmc(), 4, QChar('0')).arg(card->getManaCost())
+        //                             : card->getManaCost();
+        // case CardTypeColumn:
+        //     return card->getCardType();
+        // case PTColumn:
+        //     return card->getPowTough();
+        // case ColorColumn:
+        //     return card->getColors();
         default:
             return QVariant();
     }
-    */
 }
 
 QVariant CardDatabaseModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    /*
     if (role != Qt::DisplayRole)
         return QVariant();
     if (orientation != Qt::Horizontal)
@@ -74,21 +72,17 @@ QVariant CardDatabaseModel::headerData(int section, Qt::Orientation orientation,
     switch (section) {
         case NameColumn:
             return QString(tr("Name"));
-        case SetListColumn:
-            return QString(tr("Sets"));
-        case ManaCostColumn:
-            return QString(tr("Mana cost"));
-        case CardTypeColumn:
-            return QString(tr("Card type"));
-        case PTColumn:
-            return QString(tr("P/T"));
-        case ColorColumn:
-            return QString(tr("Color(s)"));
+        case DisclipesColumn:
+            return QString(tr("Disclipes"));
+        case CapacityColumn:
+            return QString(tr("Capacity"));
+        case ClanColumn:
+            return QString(tr("Clan"));
+        case GroupColumn:
+            return QString(tr("Group"));
         default:
             return QVariant();
     }
-    */
-    return QVariant();
 }
 
 void CardDatabaseModel::cardInfoChanged(CardInfoPtr card)
@@ -130,9 +124,11 @@ void CardDatabaseModel::cardDatabaseEnabledSetsChanged()
 
 void CardDatabaseModel::cardAdded(CardInfoPtr card)
 {
-    if (checkCardHasAtLeastOneEnabledSet(card)) {
+    /* Todo; Fix this set stuff, right now we enable everything. */
+    if (checkCardHasAtLeastOneEnabledSet(card) || true) {
         // add the card if it's present in at least one enabled set
         beginInsertRows(QModelIndex(), cardList.size(), cardList.size());
+        qDebug() << card;
         cardList.append(card);
         connect(card.data(), SIGNAL(cardInfoChanged(CardInfoPtr)), this, SLOT(cardInfoChanged(CardInfoPtr)));
         endInsertRows();
@@ -205,7 +201,7 @@ bool CardDatabaseDisplayModel::lessThan(const QModelIndex &left, const QModelInd
         // same checks for the right string
         if (isRightType && (!isLeftType || rightString.size() == cardName.size()))
             return false;
-    } else if (right.column() == CardDatabaseModel::PTColumn && left.column() == CardDatabaseModel::PTColumn) {
+    } /*  else if (right.column() == CardDatabaseModel::PTColumn && left.column() == CardDatabaseModel::PTColumn) {
         QStringList leftList = leftString.split("/");
         QStringList rightList = rightString.split("/");
 
@@ -220,7 +216,7 @@ bool CardDatabaseDisplayModel::lessThan(const QModelIndex &left, const QModelInd
                 return lessThanNumerically(leftList.at(1), rightList.at(1)) < 0;
             }
         }
-    }
+    }*/
     return QString::localeAwareCompare(leftString, rightString) < 0;
 }
 

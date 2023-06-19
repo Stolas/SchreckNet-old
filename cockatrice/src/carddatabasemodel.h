@@ -19,11 +19,10 @@ public:
     enum Columns
     {
         NameColumn,
-        SetListColumn,
-        ManaCostColumn,
-        PTColumn,
-        CardTypeColumn,
-        ColorColumn
+        DisclipesColumn,
+        CapacityColumn,
+        ClanColumn,
+        GroupColumn
     };
     enum Role
     {

@@ -84,14 +84,14 @@ CardInfoPtr OracleImporter::addCard(QString id,
     CardInfoPerSetMap setsInfo;// = CardInfoPerSetMap();
     //setsInfo.insert(setInfo.getPtr()->getShortName(), setInfo);
     auto sets = properties.value(VTES::Sets).toStringList();
-    qDebug() << sets;
-    // CardSet setInfo = CardSet::newInstance();
-    // setInfo.
-    //setInfo->
-    for (const auto &set : sets) {
-        auto instance = CardSet::newInstance(set, set);
-        setsInfo.insert(set, instance);
-    }
+    // qDebug() << sets;
+    // // CardSet setInfo = CardSet::newInstance();
+    // // setInfo.
+    // //setInfo->
+    // for (const auto &set : sets) {
+    //     auto instance = CardSet::newInstance(set, set);
+    //     setsInfo.insert(set, instance);
+    // }
 
     properties.insert("id", id);
     properties.insert("picurl", picture_url);

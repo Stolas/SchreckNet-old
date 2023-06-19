@@ -557,6 +557,9 @@ QStringList CardDatabase::getAllMainCardTypes() const
 
 void CardDatabase::checkUnknownSets()
 {
+    /* Todo; Fix the sets stuff. */
+    return;
+
     SetList sets = getSetList();
 
     if (sets.getEnabledSetsNum()) {

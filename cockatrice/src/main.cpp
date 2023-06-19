@@ -54,7 +54,7 @@ SoundEngine *soundEngine;
 QSystemTrayIcon *trayIcon;
 ThemeManager *themeManager;
 
-const QString translationPrefix = "cockatrice";
+const QString translationPrefix = "schrecknet";
 QString translationPath;
 
 static void CockatriceLogger(QtMsgType type, const QMessageLogContext &ctx, const QString &message)
@@ -116,9 +116,9 @@ int main(int argc, char *argv[])
 
     // These values are only used by the settings loader/saver
     // Wrong or outdated values are kept to not break things
-    QCoreApplication::setOrganizationName("Cockatrice");
-    QCoreApplication::setOrganizationDomain("cockatrice.de");
-    QCoreApplication::setApplicationName("Cockatrice");
+    QCoreApplication::setOrganizationName("shrecknet");
+    QCoreApplication::setOrganizationDomain("schreck.net"); /* Todo; set to something that is correct. */
+    QCoreApplication::setApplicationName("schrecknet");
     QCoreApplication::setApplicationVersion(VERSION_STRING);
 
 #ifdef Q_OS_MAC
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 #endif
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("Cockatrice");
+    parser.setApplicationDescription("schrecknet");
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
     ui.setWindowIcon(QPixmap("theme:cockatrice"));
 #if QT_VERSION >= QT_VERSION_CHECK(5, 7, 0)
     // set name of the app desktop file; used by wayland to load the window icon
-    QGuiApplication::setDesktopFileName("cockatrice");
+    QGuiApplication::setDesktopFileName("schrecknet");
 #endif
 
     SettingsCache::instance().setClientID(generateClientID());
