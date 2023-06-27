@@ -93,10 +93,10 @@ CardInfoPtr OracleImporter::addCard(QString id,
     //     setsInfo.insert(set, instance);
     // }
 
-    properties.insert("id", id);
-    properties.insert("picurl", picture_url);
     CardInfoPtr newCard = CardInfo::newInstance(name, text, isCrypt, isToken, properties,
                                                 setsInfo, tableRow);
+    newCard->setProperty(VTES::Id, id);
+    newCard->setProperty(VTES::PicUrl, picture_url);
 
     // if (name.isEmpty()) {
     //     qDebug() << "warning: an empty card was added to set" << setInfo.getPtr()->getShortName();
@@ -133,7 +133,7 @@ int OracleImporter::startImport()
         if (types.contains("Vampire") || types.contains("Imbued")) {
             /* Parse as Crypt Card */
             isCrypt = true;
-            properties[VTES::Capacity] = obj["capacity"].toString();
+            properties[VTES::Capacity] = QString::number(obj["capacity"].toInt());
             properties[VTES::Disciplines] = obj["disciplines"].toVariant().toStringList();
             properties[VTES::Group] = obj["group"].toString();
             // properties["title"] = obj["title"].toString();
@@ -145,7 +145,7 @@ int OracleImporter::startImport()
             properties[VTES::BloodCost] = obj["blood_cost"].toString();
         }
 
-        id = obj["id"].toString();
+        id = QString::number(obj["id"].toInt()); // todo; nullptr
         name = obj["_name"].toString();
         text = obj["card_text"].toString();
         picture_url = obj["url"].toString();

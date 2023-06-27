@@ -234,6 +234,11 @@ public:
         return getProperty(VTES::Group);
     }
 
+    QString getId() const
+    {
+        return getProperty(VTES::Id);
+    }
+
     const QStringList getProperties() const
     {
         return properties.keys();
@@ -309,13 +314,13 @@ public:
     // methods using per-set properties
     QString getPicURL(const QString &set) const
     {
-        return "https://static.krcg.org/card/ubendeg4.jpg";
+        //return "https://static.krcg.org/card/ubendeg4.jpg";
         if (set == nullptr) {
-            return getProperty("picurl");
+            return getProperty(VTES::PicUrl);
         }
         // Todo; this should be deadcode.
         qDebug() << "This should never be shown";
-        return getSetProperty(set, "picurl");
+        return getSetProperty(set, VTES::PicUrl);
     }
     QString getCorrectedName() const;
     void addToSet(const CardSetPtr &_set, CardInfoPerSet _info = CardInfoPerSet());

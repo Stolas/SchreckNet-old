@@ -83,7 +83,7 @@ void Logger::closeLogfileSession()
 
 void Logger::log(QtMsgType /* type */, const QMessageLogContext & /* ctx */, const QString message)
 {
-    QMetaObject::invokeMethod(this, "internalLog", Qt::QueuedConnection, Q_ARG(const QString &, message));
+   QMetaObject::invokeMethod(this, "internalLog", Qt::QueuedConnection, Q_ARG(const QString &, message));
 }
 
 void Logger::internalLog(QString message)

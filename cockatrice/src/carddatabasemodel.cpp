@@ -6,6 +6,7 @@
 
 #define CARDDBMODEL_COLUMNS 8
 
+
 CardDatabaseModel::CardDatabaseModel(CardDatabase *_db, bool _showOnlyCardsFromEnabledSets, QObject *parent)
     : QAbstractListModel(parent), db(_db), showOnlyCardsFromEnabledSets(_showOnlyCardsFromEnabledSets)
 {
@@ -44,9 +45,9 @@ QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
         case NameColumn:
             return card->getName();
         case TypeColumn:
-            return "woop";
+            return card->getCardTypes().join(", ");
         case DisclipesColumn:
-            return card->getDisciplines();
+            return card->getDisciplines().join(", ");
         case CapacityColumn:
             return card->getCapacity();
         case ClanColumn:
@@ -131,9 +132,9 @@ void CardDatabaseModel::cardAdded(CardInfoPtr card)
 {
     /* Todo; Fix this set stuff, right now we enable everything. */
     if (checkCardHasAtLeastOneEnabledSet(card) || true) {
-        // add the card if it's present in at least one enabled set
+    //     // add the card if it's present in at least one enabled set
         beginInsertRows(QModelIndex(), cardList.size(), cardList.size());
-        //qDebug() << card;
+
         cardList.append(card);
         connect(card.data(), SIGNAL(cardInfoChanged(CardInfoPtr)), this, SLOT(cardInfoChanged(CardInfoPtr)));
         endInsertRows();

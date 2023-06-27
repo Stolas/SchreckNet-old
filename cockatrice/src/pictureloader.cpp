@@ -60,13 +60,13 @@ void PictureToLoad::populateSetUrls()
         }
     }
 
-    for (const QString &urlTemplate : urlTemplates) {
-        QString transformedUrl = transformUrl(urlTemplate);
+    // for (const QString &urlTemplate : urlTemplates) {
+    //     QString transformedUrl = transformUrl(urlTemplate);
 
-        if (!transformedUrl.isEmpty()) {
-            currentSetUrls.append(transformedUrl);
-        }
-    }
+    //     if (!transformedUrl.isEmpty()) {
+    //         currentSetUrls.append(transformedUrl);
+    //     }
+    // }
 
     /* Call nextUrl to make sure currentUrl is up-to-date
        but we don't need the result here. */

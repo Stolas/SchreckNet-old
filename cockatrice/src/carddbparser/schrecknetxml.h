@@ -1,5 +1,5 @@
-#ifndef COCKATRICE_XML3_H
-#define COCKATRICE_XML3_H
+#ifndef SCHRECKNET_XML_H
+#define SCHRECKNET_XML_H
 
 #include "carddatabaseparser.h"
 
@@ -21,6 +21,7 @@ public:
                     const QString &sourceVersion = "unknown") override;
 
 private:
+    void loadCardFromXml(QXmlStreamReader &xml, bool isCrypt);
     void loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt);
     void loadCryptCardsFromXml(QXmlStreamReader &xml);
     void loadLibraryCardsFromXml(QXmlStreamReader &xml);

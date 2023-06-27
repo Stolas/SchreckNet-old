@@ -7,6 +7,8 @@
 
 namespace VTES
 {
+QString const Id("id");
+QString const PicUrl("picurl");
 QString const CardTypes("types");
 QString const Capacity("cap");
 QString const PoolCost("pool");
