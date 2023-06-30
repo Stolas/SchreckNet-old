@@ -123,6 +123,7 @@ int OracleImporter::startImport()
     QString picture_url;
 
     for (auto it : allCards) {
+        properties.clear();
         //qDebug() << "Card " << it;
         auto obj = it.toObject();
         // qDebug() << "Object " << obj;
@@ -171,8 +172,13 @@ int OracleImporter::startImport()
         QStringList setList = QStringList();
         auto setsObj = obj["sets"].toObject();
         for (auto &key : setsObj.keys()) {
+
+            /* Todo;l fix this */
             setList.append(key);
+            auto setObj = setsObj[key].toObject();
+            auto release_date = setObj["release_date"].toString();
         }
+        // Todo; Sets 
         properties[VTES::Sets] = setList;
         CardInfoPtr newCard = addCard(id, isCrypt, name, picture_url, text, properties, false);
         numCards++;

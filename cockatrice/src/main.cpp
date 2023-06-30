@@ -109,7 +109,9 @@ int main(int argc, char *argv[])
 
     QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
-    qInstallMessageHandler(CockatriceLogger);
+#ifndef _DEBUG
+qInstallMessageHandler(CockatriceLogger);
+#endif
 #ifdef Q_OS_WIN
     app.addLibraryPath(app.applicationDirPath() + "/plugins");
 #endif

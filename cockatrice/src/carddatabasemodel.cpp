@@ -37,8 +37,13 @@ int CardDatabaseModel::columnCount(const QModelIndex & /*parent*/) const
 QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() >= cardList.size() || index.column() >= CARDDBMODEL_COLUMNS ||
-        (role != Qt::DisplayRole && role != SortRole))
+        (role != Qt::DisplayRole && role != SortRole)) {
         return QVariant();
+    }
+
+    qDebug() << "|" << index.row() << "|" << cardList.size() << ":"; 
+    return QVariant();
+
 
     CardInfoPtr card = cardList.at(index.row());
     switch (index.column()) {
@@ -134,7 +139,6 @@ void CardDatabaseModel::cardAdded(CardInfoPtr card)
     if (checkCardHasAtLeastOneEnabledSet(card) || true) {
     //     // add the card if it's present in at least one enabled set
         beginInsertRows(QModelIndex(), cardList.size(), cardList.size());
-
         cardList.append(card);
         connect(card.data(), SIGNAL(cardInfoChanged(CardInfoPtr)), this, SLOT(cardInfoChanged(CardInfoPtr)));
         endInsertRows();
