@@ -41,18 +41,19 @@ QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    qDebug() << "|" << index.row() << "|" << cardList.size() << ":"; 
-    return QVariant();
-
-
     CardInfoPtr card = cardList.at(index.row());
     switch (index.column()) {
         case NameColumn:
             return card->getName();
         case TypeColumn:
             return card->getCardTypes().join(", ");
-        case DisclipesColumn:
-            return card->getDisciplines().join(", ");
+        case DisclipesColumn: {
+            QString disciplineStr = "con AUS";
+            for (auto &discipline : card->getDisciplines()) {
+                qDebug() << discipline;
+            }
+            return disciplineStr;
+        }
         case CapacityColumn:
             return card->getCapacity();
         case ClanColumn:

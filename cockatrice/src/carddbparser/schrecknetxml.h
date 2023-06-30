@@ -21,7 +21,6 @@ public:
                     const QString &sourceVersion = "unknown") override;
 
 private:
-    void loadPropertiesFromXml(QXmlStreamReader &xml, bool isCrypt, QVariantHash properties);
     void loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt);
     void loadSetsFromXml(QXmlStreamReader &xml);
     void loadTokensFromXml(QXmlStreamReader &xml);

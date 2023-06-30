@@ -182,6 +182,7 @@ def load_json():
         print(f"[!] Failed, KRCG returned: {resp.status_code}")
         return
 
+    import ipdb ; ipdb.set_trace()
     all_cards = []
     for card in resp.json():
         properties = {}
@@ -192,6 +193,7 @@ def load_json():
             properties["disciplines"] = card.get("disciplines", None)
             properties["group"] = card["group"]
             properties["title"] = card.get("title", '')
+            properties["advanced"] = card.get("adv", False)
         else:
             # Parse as Library Card
             card_type = "library"
@@ -205,8 +207,6 @@ def load_json():
         properties["clans"] = card.get("clans", [])
         properties["types"] = card.get("types", [])
         properties["sets"] = card["sets"];
-        if name == "Cock Robin":
-            import ipdb; ipdb.set_trace()
 
         all_cards.append(add_card(card_id, card_type, name, picture_url, text, properties))
     return all_cards

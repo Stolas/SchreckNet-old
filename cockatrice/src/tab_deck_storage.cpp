@@ -287,7 +287,7 @@ void TabDeckStorage::actDownload()
         dynamic_cast<RemoteDeckList_TreeModel::FileNode *>(serverDirView->getCurrentItem());
     if (!curRight)
         return;
-    filePath += QString("/deck_%1.cod").arg(curRight->getId());
+    filePath += QString("/deck_%1.snd").arg(curRight->getId());
 
     Command_DeckDownload cmd;
     cmd.set_deck_id(curRight->getId());

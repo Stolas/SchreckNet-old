@@ -65,6 +65,9 @@
 #include <QtConcurrent>
 #include <QtNetwork>
 
+
+// Todo; set these uris
+
 #define GITHUB_PAGES_URL "https://cockatrice.github.io"
 #define GITHUB_CONTRIBUTORS_URL "https://github.com/Cockatrice/Cockatrice/graphs/contributors?type=c"
 #define GITHUB_CONTRIBUTE_URL "https://github.com/Cockatrice/Cockatrice#cockatrice"
@@ -75,7 +78,7 @@
 #define GITHUB_FAQ_URL "https://github.com/Cockatrice/Cockatrice/wiki/Frequently-Asked-Questions"
 
 const QString MainWindow::appName = "Cockatrice";
-const QStringList MainWindow::fileNameFilters = QStringList() << QObject::tr("Cockatrice card database (*.xml)")
+const QStringList MainWindow::fileNameFilters = QStringList() << QObject::tr("Schrecknet card database (*.xml)")
                                                               << QObject::tr("All files (*.*)");
 
 void MainWindow::updateTabMenu(const QList<QMenu *> &newMenuList)
@@ -131,7 +134,7 @@ void MainWindow::processServerShutdownEvent(const Event_ServerShutdown &event)
                                                    "games will be lost.\nReason for shutdown: %1",
                                                    "", event.minutes())
                                                     .arg(QString::fromStdString(event.reason())));
-    serverShutdownMessageBox.setIconPixmap(QPixmap("theme:cockatrice").scaled(64, 64));
+    serverShutdownMessageBox.setIconPixmap(QPixmap("theme:schrecknet").scaled(64, 64));
     serverShutdownMessageBox.setText(tr("Scheduled server shutdown"));
     serverShutdownMessageBox.setWindowModality(Qt::ApplicationModal);
     serverShutdownMessageBox.setVisible(true);
@@ -248,7 +251,7 @@ void MainWindow::actWatchReplay()
 {
     QFileDialog dlg(this, tr("Load replay"));
     dlg.setDirectory(SettingsCache::instance().getReplaysPath());
-    dlg.setNameFilters(QStringList() << QObject::tr("Cockatrice replays (*.cor)"));
+    dlg.setNameFilters(QStringList() << QObject::tr("Schrecknet replays (*.cor)"));
     if (!dlg.exec())
         return;
 
@@ -302,11 +305,12 @@ void MainWindow::actExit()
 
 void MainWindow::actAbout()
 {
+    /* Todo; create about menu */
     QMessageBox mb(
-        QMessageBox::NoIcon, tr("About Cockatrice"),
-        QString("<font size=\"8\"><b>Cockatrice</b></font> (" + QString::fromStdString(BUILD_ARCHITECTURE) + ")<br>" +
+        QMessageBox::NoIcon, tr("About Schrecknet"),
+        QString("<font size=\"8\"><b>Schrecknet</b></font> (" + QString::fromStdString(BUILD_ARCHITECTURE) + ")<br>" +
                 tr("Version") + QString(" %1").arg(VERSION_STRING) + "<br><br><b><a href='" + GITHUB_PAGES_URL + "'>" +
-                tr("Cockatrice Webpage") + "</a></b><br>" + "<br><b>" + tr("Project Manager:") +
+                tr("Schrecknet Webpage") + "</a></b><br>" + "<br><b>" + tr("Project Manager:") +
                 "</b><br>Zach Halpern<br><br>" + "<b>" + tr("Past Project Managers:") +
                 "</b><br>Gavin Bisesi<br>Max-Wilhelm Bruker<br>Marcus Schütz<br><br>" + "<b>" + tr("Developers:") +
                 "</b><br>" + "<a href='" + GITHUB_CONTRIBUTORS_URL + "'>" + tr("Our Developers") + "</a><br>" +
@@ -572,13 +576,13 @@ void MainWindow::protocolVersionMismatch(int localVersion, int remoteVersion)
 {
     if (localVersion > remoteVersion)
         QMessageBox::critical(this, tr("Error"),
-                              tr("You are trying to connect to an obsolete server. Please downgrade your Cockatrice "
+                              tr("You are trying to connect to an obsolete server. Please downgrade your Schrecknet "
                                  "version or connect to a suitable server.\nLocal version is %1, remote version is %2.")
                                   .arg(localVersion)
                                   .arg(remoteVersion));
     else
         QMessageBox::critical(this, tr("Error"),
-                              tr("Your Cockatrice client is obsolete. Please update your Cockatrice version.\nLocal "
+                              tr("Your Schrecknet client is obsolete. Please update your Schrecknet version.\nLocal "
                                  "version is %1, remote version is %2.")
                                   .arg(localVersion)
                                   .arg(remoteVersion));
@@ -886,12 +890,12 @@ void MainWindow::alertForcedOracleRun(const QString &version, bool isUpdate)
 {
     if (isUpdate) {
         QMessageBox::information(this, tr("New Version"),
-                                 tr("Congratulations on updating to Cockatrice %1!\n"
+                                 tr("Congratulations on updating to Schrecknet %1!\n"
                                     "Oracle will now launch to update your card database.")
                                      .arg(version));
     } else {
-        QMessageBox::information(this, tr("Cockatrice installed"),
-                                 tr("Congratulations on installing Cockatrice %1!\n"
+        QMessageBox::information(this, tr("Schrecknet installed"),
+                                 tr("Congratulations on installing Schrecknet %1!\n"
                                     "Oracle will now launch to install the initial card database.")
                                      .arg(version));
     }
@@ -922,7 +926,7 @@ void MainWindow::createTrayIcon()
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
-    trayIcon->setIcon(QPixmap("theme:cockatrice"));
+    trayIcon->setIcon(QPixmap("theme:schrecknet"));
     trayIcon->show();
 
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this,

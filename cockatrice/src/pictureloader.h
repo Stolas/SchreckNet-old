@@ -123,7 +123,7 @@ private:
 
 public:
     static void getPixmap(QPixmap &pixmap, CardInfoPtr card, QSize size);
-    static void getCardBackPixmap(QPixmap &pixmap, QSize size);
+    static void getCardBackPixmap(QPixmap &pixmap, QSize size, bool isCrypt);
     static void clearPixmapCache(CardInfoPtr card);
     static void clearPixmapCache();
     static void cacheCardPixmaps(QList<CardInfoPtr> cards);

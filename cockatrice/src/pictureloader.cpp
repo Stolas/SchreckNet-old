@@ -544,12 +544,12 @@ PictureLoader::~PictureLoader()
     worker->deleteLater();
 }
 
-void PictureLoader::getCardBackPixmap(QPixmap &pixmap, QSize size)
+void PictureLoader::getCardBackPixmap(QPixmap &pixmap, QSize size, bool isCrypt)
 {
     QString backCacheKey = "_trice_card_back_" + QString::number(size.width()) + QString::number(size.height());
     if (!QPixmapCache::find(backCacheKey, &pixmap)) {
         qDebug() << "PictureLoader: cache fail for" << backCacheKey;
-        pixmap = QPixmap("theme:cardback").scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        pixmap = QPixmap(isCrypt ? "theme:cryptback" : "theme:cardback").scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         QPixmapCache::insert(backCacheKey, pixmap);
     }
 }

@@ -10,7 +10,7 @@
 #include <QStringList>
 
 const QStringList DeckLoader::fileNameFilters = QStringList()
-                                                << QObject::tr("Common deck formats (*.cod *.dec *.dek *.txt *.mwDeck)")
+                                                << QObject::tr("Common deck formats (*.snd *.cod *.dec *.dek *.txt *.mwDeck)")
                                                 << QObject::tr("All files (*.*)");
 
 DeckLoader::DeckLoader() : DeckList(), lastFileName(QString()), lastFileFormat(CockatriceFormat), lastRemoteDeckId(-1)
@@ -131,7 +131,7 @@ struct FormatDeckListForExport
         }
 
         // Check if it's a sideboard card.
-        if (node->getName() == DECK_ZONE_SIDE) {
+        if (node->getName() == DECK_ZONE_CRYPT) {
             // Get the number of cards and add the card name
             sideBoardCards += QString::number(card->getNumber());
             // Add a space between card num and name
@@ -177,7 +177,7 @@ QString DeckLoader::exportDeckToDecklist()
 
 DeckLoader::FileFormat DeckLoader::getFormatFromName(const QString &fileName)
 {
-    if (fileName.endsWith(".cod", Qt::CaseInsensitive)) {
+    if (fileName.endsWith(".snd", Qt::CaseInsensitive)) {
         return CockatriceFormat;
     }
     return PlainTextFormat;
@@ -270,7 +270,7 @@ void DeckLoader::saveToStream_DeckZoneCards(QTextStream &out,
     for (int i = cards.size() - 1; i >= 0; --i) {
         DecklistCardNode *card = cards[i];
 
-        if (zoneNode->getName() == DECK_ZONE_SIDE && addComments) {
+        if (zoneNode->getName() == DECK_ZONE_CRYPT && addComments) {
             out << "SB: ";
         }
 
