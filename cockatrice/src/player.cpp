@@ -19,6 +19,7 @@
 #include "pb/command_concede.pb.h"
 #include "pb/command_create_token.pb.h"
 #include "pb/command_draw_cards.pb.h"
+#include "pb/command_draw_crypt_cards.pb.h"
 #include "pb/command_flip_card.pb.h"
 #include "pb/command_game_say.pb.h"
 #include "pb/command_move_card.pb.h"
@@ -168,7 +169,7 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
         aMoveHandToBottomLibrary = new QAction(this);
         aMoveHandToBottomLibrary->setData(QList<QVariant>() << "deck" << -1);
         aMoveHandToGrave = new QAction(this);
-        aMoveHandToGrave->setData(QList<QVariant>() << "grave" << 0);
+        aMoveHandToGrave->setData(QList<QVariant>() << "ashpile" << 0);
         aMoveHandToRfg = new QAction(this);
         aMoveHandToRfg->setData(QList<QVariant>() << "rfg" << 0);
 
@@ -232,7 +233,6 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
     if (local || judge) {
         aViewSideboard = new QAction(this);
         connect(aViewSideboard, SIGNAL(triggered()), this, SLOT(actViewSideboard()));
-
 
         aDrawCryptCard = new QAction(this);
         connect(aDrawCryptCard, SIGNAL(triggered()), this, SLOT(actDrawCryptCard()));
@@ -385,10 +385,6 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
         moveRfgMenu->addSeparator();
         moveRfgMenu->addAction(aMoveRfgToGrave);
 
-        sbMenu = playerMenu->addMenu(QString());
-        sbMenu->addAction(aViewSideboard);
-        sb->setMenu(sbMenu, aViewSideboard);
-
         aUntapAll = new QAction(this);
         connect(aUntapAll, SIGNAL(triggered()), this, SLOT(actUntapAll()));
 
@@ -445,7 +441,6 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
 
     if (!local && !judge) {
         countersMenu = nullptr;
-        sbMenu = nullptr;
         aCreateAnotherToken = nullptr;
         createPredefinedTokenMenu = nullptr;
     }
@@ -776,7 +771,6 @@ void Player::retranslateUi()
         mRevealHand->setTitle(tr("&Reveal hand to..."));
         mRevealRandomHandCard->setTitle(tr("Reveal r&andom card to..."));
         mRevealRandomGraveyardCard->setTitle(tr("Reveal random card to..."));
-        sbMenu->setTitle(tr("&Sideboard"));
         libraryMenu->setTitle(tr("&Library"));
         cryptMenu->setTitle(tr("&Crypt"));
         countersMenu->setTitle(tr("&Counters"));
@@ -810,7 +804,7 @@ void Player::retranslateUi()
     aTap->setText(tr("&Tap / Untap"));
     aDoesntUntap->setText(tr("Toggle &normal untapping"));
     //: Turn face up/face down
-    aFlip->setText(tr("T&urn Over")); // Only the user facing names in client got renamed to "turn over"
+    aFlip->setText(tr("F&lip Over")); // Only the user facing names in client got renamed to "turn over"
                                       // All code and proto bits are still unchanged (flip) for compatibility reasons
                                       // A protocol rewrite with v3 could incorporate that, see #3100
     aPeek->setText(tr("&Peek at card face"));
@@ -1024,6 +1018,7 @@ void Player::setDeck(const DeckLoader &_deck)
     createPredefinedTokenMenu->setEnabled(false);
     predefinedTokens.clear();
     InnerDecklistNode *tokenZone = dynamic_cast<InnerDecklistNode *>(deck->getRoot()->findChild(DECK_ZONE_TOKENS));
+    // InnerDecklistNode *cryptZone = dynamic_cast<InnerDecklistNode *>(deck->getRoot()->findChild(DECK_ZONE_CRYPT));
 
     if (tokenZone) {
         if (tokenZone->size() > 0)
@@ -1126,8 +1121,6 @@ void Player::actDrawCryptCard()
     cmd.set_number(1);
     sendGameCommand(cmd);
 }
-
-
 
 void Player::actDrawCard()
 {
@@ -1383,7 +1376,7 @@ void Player::actMoveBottomCardsToGrave()
 
     bool ok;
     int number =
-        QInputDialog::getInt(game, tr("Move bottom cards to grave"), tr("Number of cards: (max. %1)").arg(maxCards),
+        QInputDialog::getInt(game, tr("Move bottom cards to ash heap"), tr("Number of cards: (max. %1)").arg(maxCards),
                              defaultNumberBottomCards, 1, maxCards, 1, &ok);
     if (!ok) {
         return;
@@ -1415,7 +1408,7 @@ void Player::actMoveBottomCardsToExile()
 
     bool ok;
     int number =
-        QInputDialog::getInt(game, tr("Move bottom cards to exile"), tr("Number of cards: (max. %1)").arg(maxCards),
+        QInputDialog::getInt(game, tr("Remove bottom cards from the game"), tr("Number of cards: (max. %1)").arg(maxCards),
                              defaultNumberBottomCards, 1, maxCards, 1, &ok);
     if (!ok) {
         return;
@@ -2229,15 +2222,18 @@ void Player::eventDrawCryptCards(const Event_DrawCryptCards &event)
         for (int i = 0; i < listSize; ++i) {
             const ServerInfo_Card &cardInfo = event.cards(i);
             CardItem *card = crypt->takeCard(0, cardInfo.id());
+            card->setFaceDown(true);
             card->setName(QString::fromStdString(cardInfo.name()));
             qDebug() << "CRYPT CARD :: " << card->getName();
-            // hand->addCard(card, false, -1);
+            table->addCard(card, false, -1);
         }
     } else {
         const int number = event.number();
         for (int i = 0; i < number; ++i) {
             //qDebug() << "CRYPT CARD :: " << card;
-            hand->addCard(crypt->takeCard(0, -1), false, -1);
+            CardItem* card = crypt->takeCard(0, -1);
+            card->setFaceDown(true);
+            table->addCard(card, false, -1);
             // hand->addCard(deck->takeCard(0, -1), false, -1);
         }
     }
@@ -2438,6 +2434,7 @@ void Player::processPlayerInfo(const ServerInfo_Player &info)
     const int zoneListSize = info.zone_list_size();
     for (int i = 0; i < zoneListSize; ++i) {
         const ServerInfo_Zone &zoneInfo = info.zone_list(i);
+
         CardZone *zone = zones.value(QString::fromStdString(zoneInfo.name()), 0);
         if (!zone) {
             continue;

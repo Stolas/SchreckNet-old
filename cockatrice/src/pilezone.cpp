@@ -30,8 +30,10 @@ QRectF PileZone::boundingRect() const
 
 void PileZone::paint(QPainter *painter, const QStyleOptionGraphicsItem * /*option*/, QWidget * /*widget*/)
 {
-    if (!cards.isEmpty())
-        cards.at(0)->paintPicture(painter, cards.at(0)->getTranslatedSize(painter), 90);
+    if (!cards.isEmpty()) {
+        bool isCrypt = getName() == "crypt";
+        cards.at(0)->paintPicture(painter, cards.at(0)->getTranslatedSize(painter), 90, isCrypt);
+    }
 
     painter->drawRect(QRectF(0.5, 0.5, CARD_WIDTH - 1, CARD_HEIGHT - 1));
 
@@ -48,6 +50,10 @@ void PileZone::addCardImpl(CardItem *card, int x, int /*y*/)
     if (x < 0 || x >= cards.size()) {
         x = cards.size();
     }
+
+    // Todo; make it so that you cant put crypt carsd in the deck.
+    // if (this->name == "crypt" && card->
+
     cards.insert(x, card);
     card->setPos(0, 0);
     if (!contentsKnown()) {

@@ -13,6 +13,7 @@
 #include "pb/command_del_counter.pb.h"
 #include "pb/command_delete_arrow.pb.h"
 #include "pb/command_draw_cards.pb.h"
+#include "pb/command_draw_crypt_cards.pb.h"
 #include "pb/command_dump_zone.pb.h"
 #include "pb/command_flip_card.pb.h"
 #include "pb/command_game_say.pb.h"
@@ -52,6 +53,7 @@
 #include "pb/event_delete_arrow.pb.h"
 #include "pb/event_destroy_card.pb.h"
 #include "pb/event_draw_cards.pb.h"
+#include "pb/event_draw_crypt_cards.pb.h"
 #include "pb/event_dump_zone.pb.h"
 #include "pb/event_flip_card.pb.h"
 #include "pb/event_game_say.pb.h"
@@ -170,6 +172,8 @@ void Server_Player::setupZones()
     // Create zones
     auto *deckZone = new Server_CardZone(this, "deck", false, ServerInfo_Zone::HiddenZone);
     addZone(deckZone);
+    auto *cryptZone = new Server_CardZone(this, "crypt", false, ServerInfo_Zone::HiddenZone);
+    addZone(cryptZone);
     auto *sbZone = new Server_CardZone(this, "sb", false, ServerInfo_Zone::HiddenZone);
     addZone(sbZone);
     addZone(new Server_CardZone(this, "table", true, ServerInfo_Zone::PublicZone));
@@ -195,10 +199,11 @@ void Server_Player::setupZones()
     for (int i = 0; i < listRoot->size(); ++i) {
         auto *currentZone = dynamic_cast<InnerDecklistNode *>(listRoot->at(i));
         Server_CardZone *z;
+
         if (currentZone->getName() == DECK_ZONE_MAIN) {
             z = deckZone;
         } else if (currentZone->getName() == DECK_ZONE_CRYPT) {
-            z = sbZone;
+            z = cryptZone;
         } else {
             continue;
         }
@@ -208,6 +213,7 @@ void Server_Player::setupZones()
             if (!currentCard) {
                 continue;
             }
+
             for (int k = 0; k < currentCard->getNumber(); ++k) {
                 z->insertCard(new Server_Card(currentCard->getName(), nextCardId++, 0, 0, z), -1, 0);
             }
@@ -310,6 +316,42 @@ bool Server_Player::deleteArrow(int arrowId)
 void Server_Player::addCounter(Server_Counter *counter)
 {
     counters.insert(counter->getId(), counter);
+}
+
+Response::ResponseCode Server_Player::drawCryptCards(GameEventStorage &ges, int number)
+{
+    Server_CardZone *cryptZone = zones.value("crypt");
+    /* Todo send facedown to table. */
+    Server_CardZone *tableZone = zones.value("table");
+    if (cryptZone->getCards().size() < number) {
+        number = cryptZone->getCards().size();
+    }
+
+    Event_DrawCryptCards eventOthers;
+    eventOthers.set_number(number);
+    Event_DrawCryptCards eventPrivate(eventOthers);
+
+    for (int i = 0; i < number; ++i) {
+        Server_Card *card = cryptZone->getCard(0, nullptr, true);
+        card->setFaceDown(true);
+        tableZone->insertCard(card, -1, 0);
+        lastDrawList.append(card->getId());
+
+        ServerInfo_Card *cardInfo = eventPrivate.add_cards();
+        cardInfo->set_id(card->getId());
+        cardInfo->set_name(card->getName().toStdString());
+    }
+
+    ges.enqueueGameEvent(eventPrivate, playerId, GameEventStorageItem::SendToPrivate, playerId);
+    ges.enqueueGameEvent(eventOthers, playerId, GameEventStorageItem::SendToOthers);
+
+    // if (number > 0) {
+    //     revealTopCardIfNeeded(deckZone, ges);
+    //     int currentKnownCards = deckZone->getCardsBeingLookedAt();
+    //     deckZone->setCardsBeingLookedAt(currentKnownCards - number);
+    // }
+
+    return Response::RespOk;
 }
 
 Response::ResponseCode Server_Player::drawCards(GameEventStorage &ges, int number)
@@ -943,6 +985,9 @@ Server_Player::cmdGameSay(const Command_GameSay &cmd, ResponseContainer & /*rc*/
 Response::ResponseCode
 Server_Player::cmdShuffle(const Command_Shuffle &cmd, ResponseContainer & /*rc*/, GameEventStorage &ges)
 {
+
+    /* Todo; implement shuffel Crypt */
+
     if (spectator) {
         return Response::RespFunctionNotAllowed;
     }
@@ -1033,6 +1078,23 @@ Server_Player::cmdRollDie(const Command_RollDie &cmd, ResponseContainer & /*rc*/
     ges.enqueueGameEvent(event, playerId);
 
     return Response::RespOk;
+}
+
+Response::ResponseCode
+Server_Player::cmdDrawCryptCards(const Command_DrawCryptCards &cmd, ResponseContainer & /*rc*/, GameEventStorage &ges)
+{
+    if (spectator) {
+        return Response::RespFunctionNotAllowed;
+    }
+
+    if (!game->getGameStarted()) {
+        return Response::RespGameNotStarted;
+    }
+    if (conceded) {
+        return Response::RespContextError;
+    }
+
+    return drawCryptCards(ges, cmd.number());
 }
 
 Response::ResponseCode
@@ -2007,6 +2069,9 @@ Server_Player::processGameCommand(const GameCommand &command, ResponseContainer 
             break;
         case GameCommand::ROLL_DIE:
             return cmdRollDie(command.GetExtension(Command_RollDie::ext), rc, ges);
+            break;
+        case GameCommand::DRAW_CRYPT_CARDS:
+            return cmdDrawCryptCards(command.GetExtension(Command_DrawCryptCards::ext), rc, ges);
             break;
         case GameCommand::DRAW_CARDS:
             return cmdDrawCards(command.GetExtension(Command_DrawCards::ext), rc, ges);

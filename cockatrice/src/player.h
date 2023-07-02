@@ -37,6 +37,7 @@ class Event_DelCounter;
 class Event_DeleteArrow;
 class Event_DestroyCard;
 class Event_DrawCards;
+class Event_DrawCryptCards;
 class Event_DumpZone;
 class Event_FlipCard;
 class Event_GameSay;
@@ -314,7 +315,7 @@ private:
     void eventFlipCard(const Event_FlipCard &event);
     void eventDestroyCard(const Event_DestroyCard &event);
     void eventAttachCard(const Event_AttachCard &event);
-    void eventDrawCryptCards(const Event_DrawCryptCards &event)
+    void eventDrawCryptCards(const Event_DrawCryptCards &event);
     void eventDrawCards(const Event_DrawCards &event);
     void eventRevealCards(const Event_RevealCards &event);
     void eventChangeZoneProperties(const Event_ChangeZoneProperties &event);
