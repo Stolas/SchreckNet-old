@@ -26,7 +26,6 @@
 #include <QtConcurrent>
 #include <QtGui>
 
-//#define MTGJSON_VERSION_URL "https://www.mtgjson.com/api/v5/Meta.json"
 #define VTES_CARDDB_URL "https://static.krcg.org/data/vtes.json"
 
 OracleWizard::OracleWizard(QWidget *parent) : QWizard(parent)

@@ -62,7 +62,7 @@ QString CardZone::getTranslatedName(bool theirOwn, GrammaticalCase gc) const
     QString ownerName = player->getName();
     if (name == "hand")
         return (theirOwn ? tr("their hand", "nominative") : tr("%1's hand", "nominative").arg(ownerName));
-    else if (name == "deck")
+    else if (name == "deck" || name == "crypt")
         switch (gc) {
             case CaseLookAtZone:
                 return (theirOwn ? tr("their library", "look at zone")

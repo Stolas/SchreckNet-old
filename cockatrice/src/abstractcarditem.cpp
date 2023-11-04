@@ -88,7 +88,7 @@ void AbstractCardItem::transformPainter(QPainter *painter, const QSizeF &transla
     painter->setFont(f);
 }
 
-void AbstractCardItem::paintPicture(QPainter *painter, const QSizeF &translatedSize, int angle)
+void AbstractCardItem::paintPicture(QPainter *painter, const QSizeF &translatedSize, int angle, bool isCrypt)
 {
     qreal scaleFactor = translatedSize.width() / boundingRect().width();
     QPixmap translatedPixmap;
@@ -96,7 +96,7 @@ void AbstractCardItem::paintPicture(QPainter *painter, const QSizeF &translatedS
 
     if (facedown || name.isEmpty()) {
         // never reveal card color, always paint the card back
-        PictureLoader::getCardBackPixmap(translatedPixmap, translatedSize.toSize());
+        PictureLoader::getCardBackPixmap(translatedPixmap, translatedSize.toSize(), isCrypt);
     } else {
         // don't even spend time trying to load the picture if our size is too small
         if (translatedSize.width() > 10) {
@@ -155,7 +155,10 @@ void AbstractCardItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     painter->save();
 
     QSizeF translatedSize = getTranslatedSize(painter);
-    paintPicture(painter, translatedSize, tapAngle);
+    /* Todo; cardbacks.. */
+    auto isCrypt = true;
+    // getInfo()->getIsCrypt();
+    paintPicture(painter, translatedSize, tapAngle, isCrypt);
 
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);

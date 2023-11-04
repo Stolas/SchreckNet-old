@@ -37,8 +37,9 @@ int CardDatabaseModel::columnCount(const QModelIndex & /*parent*/) const
 QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() >= cardList.size() || index.column() >= CARDDBMODEL_COLUMNS ||
-        (role != Qt::DisplayRole && role != SortRole))
+        (role != Qt::DisplayRole && role != SortRole)) {
         return QVariant();
+    }
 
     CardInfoPtr card = cardList.at(index.row());
     switch (index.column()) {
@@ -46,8 +47,13 @@ QVariant CardDatabaseModel::data(const QModelIndex &index, int role) const
             return card->getName();
         case TypeColumn:
             return card->getCardTypes().join(", ");
-        case DisclipesColumn:
-            return card->getDisciplines().join(", ");
+        case DisclipesColumn: {
+            QString disciplineStr = "con AUS";
+            for (auto &discipline : card->getDisciplines()) {
+                qDebug() << discipline;
+            }
+            return disciplineStr;
+        }
         case CapacityColumn:
             return card->getCapacity();
         case ClanColumn:
@@ -134,7 +140,6 @@ void CardDatabaseModel::cardAdded(CardInfoPtr card)
     if (checkCardHasAtLeastOneEnabledSet(card) || true) {
     //     // add the card if it's present in at least one enabled set
         beginInsertRows(QModelIndex(), cardList.size(), cardList.size());
-
         cardList.append(card);
         connect(card.data(), SIGNAL(cardInfoChanged(CardInfoPtr)), this, SLOT(cardInfoChanged(CardInfoPtr)));
         endInsertRows();

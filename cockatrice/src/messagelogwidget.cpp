@@ -42,6 +42,12 @@ const QString &MessageLogWidget::deckConstant() const
     return constant;
 }
 
+const QString &MessageLogWidget::cryptConstant() const
+{
+    static const QString constant("deck");
+    return constant;
+}
+
 const QString &MessageLogWidget::sideboardConstant() const
 {
     static const QString constant("sb");
@@ -74,47 +80,47 @@ MessageLogWidget::getFromStr(CardZone *zone, QString cardName, int position, boo
     if (zoneName == tableConstant()) {
         fromStr = tr(" from play");
     } else if (zoneName == graveyardConstant()) {
-        fromStr = tr(" from their graveyard");
+        fromStr = tr(" from their ashheap");
     } else if (zoneName == exileConstant()) {
-        fromStr = tr(" from exile");
+        fromStr = tr(" from the game");
     } else if (zoneName == handConstant()) {
         fromStr = tr(" from their hand");
-    } else if (zoneName == deckConstant()) {
+    } else if (zoneName == deckConstant() || zoneName == cryptConstant()) {
         if (position == 0) {
             if (cardName.isEmpty()) {
                 if (ownerChange) {
-                    cardName = tr("the top card of %1's library").arg(zone->getPlayer()->getName());
+                    cardName = tr("the top card of %1's %2").arg(zone->getPlayer()->getName().arg(zoneName));
                 } else {
-                    cardName = tr("the top card of their library");
+                    cardName = tr("the top card of their %1").arg(zoneName);
                 }
                 cardNameContainsStartZone = true;
             } else {
                 if (ownerChange) {
-                    fromStr = tr(" from the top of %1's library").arg(zone->getPlayer()->getName());
+                    fromStr = tr(" from the top of %1's %2").arg(zone->getPlayer()->getName().arg(zoneName));
                 } else {
-                    fromStr = tr(" from the top of their library");
+                    fromStr = tr(" from the top of their %1").arg(zoneName);
                 }
             }
         } else if (position >= zone->getCards().size() - 1) {
             if (cardName.isEmpty()) {
                 if (ownerChange) {
-                    cardName = tr("the bottom card of %1's library").arg(zone->getPlayer()->getName());
+                    cardName = tr("the bottom card of %1's %2").arg(zone->getPlayer()->getName().arg(zoneName));
                 } else {
-                    cardName = tr("the bottom card of their library");
+                    cardName = tr("the bottom card of their %1").arg(zoneName);
                 }
                 cardNameContainsStartZone = true;
             } else {
                 if (ownerChange) {
-                    fromStr = tr(" from the bottom of %1's library").arg(zone->getPlayer()->getName());
+                    fromStr = tr(" from the bottom of %1's %2").arg(zone->getPlayer()->getName().arg(zoneName));
                 } else {
-                    fromStr = tr(" from the bottom of their library");
+                    fromStr = tr(" from the bottom of their %2");
                 }
             }
         } else {
             if (ownerChange) {
-                fromStr = tr(" from %1's library").arg(zone->getPlayer()->getName());
+                fromStr = tr(" from %1's %2").arg(zone->getPlayer()->getName().arg(zoneName));
             } else {
-                fromStr = tr(" from their library");
+                fromStr = tr(" from their %1").arg(zoneName);
             }
         }
     } else if (zoneName == sideboardConstant()) {
@@ -330,9 +336,9 @@ void MessageLogWidget::logMoveCard(Player *player,
             finalStr = tr("%1 puts %2 into play%3.");
         }
     } else if (targetZoneName == graveyardConstant()) {
-        finalStr = tr("%1 puts %2%3 into their graveyard.");
+        finalStr = tr("%1 puts %2%3 into their ash heap.");
     } else if (targetZoneName == exileConstant()) {
-        finalStr = tr("%1 exiles %2%3.");
+        finalStr = tr("%1 removes %2%3 from the game.");
     } else if (targetZoneName == handConstant()) {
         finalStr = tr("%1 moves %2%3 to their hand.");
     } else if (targetZoneName == deckConstant()) {

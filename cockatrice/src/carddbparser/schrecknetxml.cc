@@ -64,7 +64,6 @@ void SchrecknetParser::parseFile(QIODevice &device)
                     loadCardsFromXml(xml, true);
                 } else if (name == "library_cards") {
                     loadCardsFromXml(xml, false);
-                    // loadLibraryCardsFromXml(xml);
                 } else if (name == "tokens") {
                     // loadTokensFromXml(xml);
                 } else if (!name.isEmpty()) {
@@ -139,37 +138,9 @@ QString SchrecknetParser::getMainCardType(QString &type)
     return result;
 }
 
-void SchrecknetParser::loadCardFromXml(QXmlStreamReader &xml, bool isCrypt)
-{
-}
 
 void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
 {
-
-    #if 0
-    CardInfoPerSetMap sets_ = CardInfoPerSetMap();
-    QVariantHash properties_ = QVariantHash();
-    properties_.insert(VTES::Advanced, true);
-    properties_.insert(VTES::BloodCost, "0");
-    properties_.insert(VTES::Capacity, "1");
-    properties_.insert(VTES::CardTypes, QStringList("Vampire"));
-    properties_.insert(VTES::Clans, QStringList("Baali"));
-    properties_.insert(VTES::Disciplines, QStringList("DOM"));
-    properties_.insert(VTES::Group, "2");
-    properties_.insert(VTES::Id, "3");
-    properties_.insert(VTES::PicUrl, "4");
-    properties_.insert(VTES::PoolCost, "5");
-    properties_.insert(VTES::Sets, "XXX");
-
-    emit addCard(CardInfo::newInstance("Robin", "+10 Capacity when Lan is in Play.", isCrypt, false, properties_, sets_, 0));
-    emit addCard(CardInfo::newInstance("Lan", "Always Lief.", isCrypt, false, properties_, sets_, 0));
-    emit addCard(CardInfo::newInstance("Hondjes", "Shibaas .", isCrypt, false, properties_, sets_, 0));
-    emit addCard(CardInfo::newInstance("When ThisWorks", "Re-enable the basic stuff in schrekcnetxml.cc.", isCrypt, false, properties_, sets_, 0));
-
-    return;
-    #endif
-
-
     while (xml.readNextStartElement()) {
         auto xmlName = xml.name().toString();
         if (xmlName == "card") {
@@ -179,8 +150,8 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
             QString name = QString("");
             QString text = QString("");
             QString picUrl = QString("");
-            QVariantHash properties = QVariantHash();
             CardInfoPerSetMap sets = CardInfoPerSetMap();
+            QVariantHash properties = QVariantHash();
             int tableRow = 0;
 
             auto attrs = xml.attributes();
@@ -191,7 +162,7 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
 
             while (!xml.atEnd()) { /* Card */
                 if (xml.readNext() == QXmlStreamReader::EndElement && xml.name().toString() == "card") {
-                        break;
+                    break;
                 }
 
                 // variable - assigned properties
@@ -205,6 +176,9 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
                 } else if (xmlName == "tablerow") {
                     tableRow = xml.readElementText(QXmlStreamReader::IncludeChildElements).toInt();
                 } else if (xmlName == "properties") {
+
+                    QString xmlName;
+                    QXmlStreamAttributes attrs;
                     attrs = xml.attributes();
                     if (isCrypt) {
                         auto capacity = attrs.value("capacity").toString();
@@ -228,7 +202,6 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
                         }
                     }
 
-                    /* Properties */
                     while (!xml.atEnd()) {
                         if (xml.readNext() == QXmlStreamReader::EndElement && xml.name().toString() == "properties") {
                             break;
@@ -237,11 +210,13 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
                         if (xmlName == nullptr) {
                             continue;
                         }
+                        // qDebug() << "Property" << xmlName;
 
                         if (xmlName == "types") {
                             QStringList typeList;
                             while (!xml.atEnd()) {
-                                if (xml.readNext() == QXmlStreamReader::EndElement && xml.name().toString() == "type") {
+                                if (xml.readNext() == QXmlStreamReader::EndElement &&
+                                    xml.name().toString() == "types") {
                                     break;
                                 }
                                 xmlName = xml.name().toString();
@@ -251,55 +226,59 @@ void SchrecknetParser::loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt)
                                 }
                             }
                             properties.insert(VTES::CardTypes, typeList);
-
                         } else if (xmlName == "clans") {
                             QStringList clanList;
                             while (!xml.atEnd()) {
-                                if (xml.readNext() == QXmlStreamReader::EndElement) {
+                                if (xml.readNext() == QXmlStreamReader::EndElement &&
+                                    xml.name().toString() == "clans") {
                                     break;
                                 }
                                 xmlName = xml.name().toString();
                                 if (xmlName == "clan") {
-                                    clanList.append(xml.readElementText(QXmlStreamReader::IncludeChildElements));
+                                    attrs = xml.attributes();
+                                    clanList.append(attrs.value("name").toString());
                                 }
                             }
                             properties.insert(VTES::Clans, clanList);
-                        } else if (xmlName == "disciplines") {
-                            // if (!isCrypt) {
-                            //     qDebug() << "[SchrecknetParser] Library card has " << xmlName << ", trying to anyway";
-                            //     xml.skipCurrentElement();
-                            //     continue;
-                            // }
-                            // QString clans = xml.readElementText(QXmlStreamReader::IncludeChildElements);
-
-                        } else if (xmlName == "sets") {
-                            // QString setName = "Final Nights";
-                            // CardInfoPerSet setInfo(internalAddSet(setName));
-                            // sets.insert(setName, setInfo);
-                        } else if (!xmlName.isEmpty()) {
-                            qDebug() << "[SchrecknetParser] Unknown card property" << xmlName
-                                     << ", trying to continue anyway";
+                        } else if (xmlName == "disciples") {
+                            QVariantHash disciplines = QVariantHash();
+                            while (!xml.atEnd()) {
+                                if (xml.readNext() == QXmlStreamReader::EndElement &&
+                                    xml.name().toString() == "disciples") {
+                                    break;
+                                }
+                                xmlName = xml.name().toString();
+                                if (xmlName == "disciple") {
+                                    attrs = xml.attributes();
+                                    auto dispName = attrs.value("name").toString();
+                                    auto dispLevel = attrs.value("level").toString();
+                                    int level = 0;
+                                    if (dispLevel == "inf") {
+                                        level = 1;
+                                    } else if (dispLevel == "sup") {
+                                        level = 2;
+                                    }
+                                    disciplines[dispName] = level;
+                                }
+                            }
+                            properties.insert(VTES::Disciplines, disciplines);
                         }
                     } /* End of Properties */
+                } else if (xmlName == "sets") {
+                    // QString setName = "Final Nights";
+                    // CardInfoPerSet setInfo(internalAddSet(setName));
+                    // sets.insert(setName, setInfo);
+                } else if (!xmlName.isEmpty()) {
+                    qDebug() << "[SchrecknetParser] Unknown card property" << xmlName << ", trying to continue anyway";
                 }
             } /* End of Card */
-            // qDebug() << properties;
+
             CardInfoPtr newCard = CardInfo::newInstance(name, text, isCrypt, false, properties, sets, tableRow);
             emit addCard(newCard);
         } else {
             xml.skipCurrentElement();
         }
     }
-}
-
-void SchrecknetParser::loadCryptCardsFromXml(QXmlStreamReader &xml)
-{
-    return loadCardsFromXml(xml, true);
-}
-
-void SchrecknetParser::loadLibraryCardsFromXml(QXmlStreamReader &xml)
-{
-    return loadCardsFromXml(xml, false);
 }
 
 static QXmlStreamWriter &operator<<(QXmlStreamWriter &xml, const CardSetPtr &set)
@@ -335,6 +314,10 @@ static QXmlStreamWriter &operator<<(QXmlStreamWriter &xml, const CardInfoPtr &in
     xml.writeAttribute(QXmlStreamAttribute("name", info->getName()));
     xml.writeAttribute(QXmlStreamAttribute("picurl", info->getPicURL(nullptr)));
 
+
+    // Todo; Advanced properties[VTES::Advanced]
+
+
     // variable - assigned properties
     xml.writeTextElement("text", info->getText());
 
@@ -359,9 +342,20 @@ static QXmlStreamWriter &operator<<(QXmlStreamWriter &xml, const CardInfoPtr &in
 
     xml.writeStartElement("clans");
     for (auto &clan : info->getClans()) {
-        xml.writeTextElement("clan", clan);
+        xml.writeStartElement("clan");
+        xml.writeAttribute(QXmlStreamAttribute("name", clan));
+        xml.writeEndElement(); /* clan */
     }
     xml.writeEndElement(); /* clans */
+
+    xml.writeStartElement("disciples");
+    for (auto &disciple : info->getDisciplines()) {
+        xml.writeStartElement("disciple");
+        xml.writeAttribute(QXmlStreamAttribute("name", disciple.toLower()));
+        xml.writeAttribute(QXmlStreamAttribute("level", disciple.isLower() ? "inf" : "sup"));
+        xml.writeEndElement(); /* disciple */
+    }
+    xml.writeEndElement(); /* disciples */
 
     xml.writeEndElement(); /* properites */
 
@@ -384,7 +378,7 @@ static QXmlStreamWriter &operator<<(QXmlStreamWriter &xml, const CardInfoPtr &in
         }
 
         xml.writeCharacters(set.getPtr()->getShortName());
-        xml.writeEndElement();
+        xml.writeEndElement(); /* set */
     }
 
     // positioning

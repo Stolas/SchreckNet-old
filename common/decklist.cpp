@@ -109,7 +109,7 @@ QString InnerDecklistNode::visibleNameFromName(const QString &_name)
 {
     if (_name == DECK_ZONE_MAIN) {
         return QObject::tr("Maindeck");
-    } else if (_name == DECK_ZONE_SIDE) {
+    } else if (_name == DECK_ZONE_CRYPT) {
         return QObject::tr("Sideboard");
     } else if (_name == DECK_ZONE_TOKENS) {
         return QObject::tr("Tokens");
@@ -621,7 +621,7 @@ bool DeckList::loadFromStream_Plain(QTextStream &in)
         cardName = getCompleteCardName(cardName);
 
         // get zone name based on if it's in sideboard
-        QString zoneName = getCardZoneFromName(cardName, sideboard ? DECK_ZONE_SIDE : DECK_ZONE_MAIN);
+        QString zoneName = getCardZoneFromName(cardName, sideboard ? DECK_ZONE_CRYPT : DECK_ZONE_MAIN);
 
         // make new entry in decklist
         new DecklistCardNode(cardName, amount, getZoneObjFromName(zoneName));
@@ -663,7 +663,7 @@ struct WriteToStream
 
     void operator()(const InnerDecklistNode *node, const DecklistCardNode *card)
     {
-        if (prefixSideboardCards && node->getName() == DECK_ZONE_SIDE) {
+        if (prefixSideboardCards && node->getName() == DECK_ZONE_CRYPT) {
             stream << "SB: ";
         }
         if (!slashTappedOutSplitCards) {
@@ -729,7 +729,7 @@ int DeckList::getSideboardSize() const
     int size = 0;
     for (int i = 0; i < root->size(); ++i) {
         auto *node = dynamic_cast<InnerDecklistNode *>(root->at(i));
-        if (node->getName() != DECK_ZONE_SIDE) {
+        if (node->getName() != DECK_ZONE_CRYPT) {
             continue;
         }
 
@@ -803,7 +803,7 @@ void DeckList::updateDeckHash()
     bool isValidDeckList = true;
     QSet<QString> hashZones, optionalZones;
 
-    hashZones << DECK_ZONE_MAIN << DECK_ZONE_SIDE; // Zones in deck to be included in hashing process
+    hashZones << DECK_ZONE_MAIN << DECK_ZONE_CRYPT; // Zones in deck to be included in hashing process
     optionalZones << DECK_ZONE_TOKENS;             // Optional zones in deck not included in hashing process
 
     for (int i = 0; i < root->size(); i++) {
@@ -813,7 +813,7 @@ void DeckList::updateDeckHash()
             {
                 auto *card = dynamic_cast<DecklistCardNode *>(node->at(j));
                 for (int k = 0; k < card->getNumber(); ++k) {
-                    cardList.append((node->getName() == DECK_ZONE_SIDE ? "SB:" : "") + card->getName().toLower());
+                    cardList.append((node->getName() == DECK_ZONE_CRYPT ? "SB:" : "") + card->getName().toLower());
                 }
             } else if (!optionalZones.contains(node->getName())) // Not a valid zone -> cheater?
             {

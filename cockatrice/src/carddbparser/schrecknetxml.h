@@ -21,10 +21,7 @@ public:
                     const QString &sourceVersion = "unknown") override;
 
 private:
-    void loadCardFromXml(QXmlStreamReader &xml, bool isCrypt);
     void loadCardsFromXml(QXmlStreamReader &xml, bool isCrypt);
-    void loadCryptCardsFromXml(QXmlStreamReader &xml);
-    void loadLibraryCardsFromXml(QXmlStreamReader &xml);
     void loadSetsFromXml(QXmlStreamReader &xml);
     void loadTokensFromXml(QXmlStreamReader &xml);
     QString getMainCardType(QString &type);

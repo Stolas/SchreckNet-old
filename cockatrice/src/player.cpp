@@ -19,6 +19,7 @@
 #include "pb/command_concede.pb.h"
 #include "pb/command_create_token.pb.h"
 #include "pb/command_draw_cards.pb.h"
+#include "pb/command_draw_crypt_cards.pb.h"
 #include "pb/command_flip_card.pb.h"
 #include "pb/command_game_say.pb.h"
 #include "pb/command_move_card.pb.h"
@@ -40,6 +41,7 @@
 #include "pb/event_delete_arrow.pb.h"
 #include "pb/event_destroy_card.pb.h"
 #include "pb/event_draw_cards.pb.h"
+#include "pb/event_draw_crypt_cards.pb.h"
 #include "pb/event_dump_zone.pb.h"
 #include "pb/event_flip_card.pb.h"
 #include "pb/event_game_say.pb.h"
@@ -129,6 +131,11 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
 
     qreal h = deck->boundingRect().width() + 5;
 
+    PileZone *crypt = new PileZone(this, "crypt", true, false, playerArea);
+    /* Todo; move to the right location */
+    //crypt->setPos(base + QPointF(0, 2 * h + h2 + 10));
+
+
     auto *handCounter = new HandCounter(playerArea);
     handCounter->setPos(base + QPointF(0, h + 10));
     qreal h2 = handCounter->boundingRect().height();
@@ -138,9 +145,6 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
 
     PileZone *rfg = new PileZone(this, "rfg", false, true, playerArea);
     rfg->setPos(base + QPointF(0, 2 * h + h2 + 10));
-
-    PileZone *sb = new PileZone(this, "sb", false, false, playerArea);
-    sb->setVisible(false);
 
     table = new TableZone(this, this);
     connect(table, SIGNAL(sizeChanged()), this, SLOT(updateBoundingRect()));
@@ -165,7 +169,7 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
         aMoveHandToBottomLibrary = new QAction(this);
         aMoveHandToBottomLibrary->setData(QList<QVariant>() << "deck" << -1);
         aMoveHandToGrave = new QAction(this);
-        aMoveHandToGrave->setData(QList<QVariant>() << "grave" << 0);
+        aMoveHandToGrave->setData(QList<QVariant>() << "ashpile" << 0);
         aMoveHandToRfg = new QAction(this);
         aMoveHandToRfg->setData(QList<QVariant>() << "rfg" << 0);
 
@@ -230,6 +234,8 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
         aViewSideboard = new QAction(this);
         connect(aViewSideboard, SIGNAL(triggered()), this, SLOT(actViewSideboard()));
 
+        aDrawCryptCard = new QAction(this);
+        connect(aDrawCryptCard, SIGNAL(triggered()), this, SLOT(actDrawCryptCard()));
         aDrawCard = new QAction(this);
         connect(aDrawCard, SIGNAL(triggered()), this, SLOT(actDrawCard()));
         aDrawCards = new QAction(this);
@@ -317,6 +323,10 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
         libraryMenu->addAction(aOpenDeckInDeckEditor);
         deck->setMenu(libraryMenu, aDrawCard);
 
+        cryptMenu = playerMenu->addTearOffMenu(QString());
+        cryptMenu->addAction(aDrawCryptCard);
+        crypt->setMenu(cryptMenu, aDrawCryptCard);
+
         topLibraryMenu->addAction(aMoveTopToPlay);
         topLibraryMenu->addAction(aMoveTopToPlayFaceDown);
         topLibraryMenu->addAction(aMoveTopCardToBottom);
@@ -375,10 +385,6 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
         moveRfgMenu->addSeparator();
         moveRfgMenu->addAction(aMoveRfgToGrave);
 
-        sbMenu = playerMenu->addMenu(QString());
-        sbMenu->addAction(aViewSideboard);
-        sb->setMenu(sbMenu, aViewSideboard);
-
         aUntapAll = new QAction(this);
         connect(aUntapAll, SIGNAL(triggered()), this, SLOT(actUntapAll()));
 
@@ -435,7 +441,6 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
 
     if (!local && !judge) {
         countersMenu = nullptr;
-        sbMenu = nullptr;
         aCreateAnotherToken = nullptr;
         createPredefinedTokenMenu = nullptr;
     }
@@ -468,8 +473,8 @@ Player::Player(const ServerInfo_User &info, int _id, bool _local, bool _judge, T
     connect(aFlowP, SIGNAL(triggered()), this, SLOT(actFlowP()));
     aFlowT = new QAction(this);
     connect(aFlowT, SIGNAL(triggered()), this, SLOT(actFlowT()));
-    aSetPT = new QAction(this);
-    connect(aSetPT, SIGNAL(triggered()), this, SLOT(actSetBlood()));
+    aSetBlood = new QAction(this);
+    connect(aSetBlood, SIGNAL(triggered()), this, SLOT(actSetBlood()));
     aResetPT = new QAction(this);
     connect(aResetPT, SIGNAL(triggered()), this, SLOT(actResetPT()));
     aSetAnnotation = new QAction(this);
@@ -737,10 +742,12 @@ void Player::retranslateUi()
         aOpenDeckInDeckEditor->setText(tr("&Open deck in deck editor"));
         aViewSideboard->setText(tr("&View sideboard"));
         aDrawCard->setText(tr("&Draw card"));
+        aDrawCryptCard->setText(tr("&Draw Crypt card"));
         aDrawCards->setText(tr("D&raw cards..."));
         aUndoDraw->setText(tr("&Undo last draw"));
         aMulligan->setText(tr("Take &mulligan"));
         aShuffle->setText(tr("&Shuffle"));
+
 
         aMoveTopToPlay->setText(tr("&Play top card"));
         aMoveTopToPlayFaceDown->setText(tr("Play top card &face down"));
@@ -764,8 +771,8 @@ void Player::retranslateUi()
         mRevealHand->setTitle(tr("&Reveal hand to..."));
         mRevealRandomHandCard->setTitle(tr("Reveal r&andom card to..."));
         mRevealRandomGraveyardCard->setTitle(tr("Reveal random card to..."));
-        sbMenu->setTitle(tr("&Sideboard"));
         libraryMenu->setTitle(tr("&Library"));
+        cryptMenu->setTitle(tr("&Crypt"));
         countersMenu->setTitle(tr("&Counters"));
 
         aUntapAll->setText(tr("&Untap all permanents"));
@@ -797,7 +804,7 @@ void Player::retranslateUi()
     aTap->setText(tr("&Tap / Untap"));
     aDoesntUntap->setText(tr("Toggle &normal untapping"));
     //: Turn face up/face down
-    aFlip->setText(tr("T&urn Over")); // Only the user facing names in client got renamed to "turn over"
+    aFlip->setText(tr("F&lip Over")); // Only the user facing names in client got renamed to "turn over"
                                       // All code and proto bits are still unchanged (flip) for compatibility reasons
                                       // A protocol rewrite with v3 could incorporate that, see #3100
     aPeek->setText(tr("&Peek at card face"));
@@ -813,7 +820,7 @@ void Player::retranslateUi()
     aDecPT->setText(tr("Dec&rease power and toughness"));
     aFlowP->setText(tr("Increase power and decrease toughness"));
     aFlowT->setText(tr("Decrease power and increase toughness"));
-    aSetPT->setText(tr("Set &power and toughness..."));
+    aSetBlood->setText(tr("Set &power and toughness..."));
     aResetPT->setText(tr("Reset p&ower and toughness"));
     aSetAnnotation->setText(tr("&Set annotation..."));
 
@@ -867,7 +874,7 @@ void Player::setShortcutsActive()
     aDecPT->setShortcuts(shortcuts.getShortcut("Player/aDecPT"));
     aFlowP->setShortcuts(shortcuts.getShortcut("Player/aFlowP"));
     aFlowT->setShortcuts(shortcuts.getShortcut("Player/aFlowT"));
-    aSetPT->setShortcuts(shortcuts.getShortcut("Player/aSetPT"));
+    aSetBlood->setShortcuts(shortcuts.getShortcut("Player/aSetBlood"));
     aResetPT->setShortcuts(shortcuts.getShortcut("Player/aResetPT"));
     aSetAnnotation->setShortcuts(shortcuts.getShortcut("Player/aSetAnnotation"));
     aMoveToTopLibrary->setShortcuts(shortcuts.getShortcut("Player/aMoveToTopLibrary"));
@@ -911,6 +918,7 @@ void Player::setShortcutsActive()
     aViewHand->setShortcut(shortcuts.getSingleShortcut("Player/aViewHand"));
     aViewTopCards->setShortcut(shortcuts.getSingleShortcut("Player/aViewTopCards"));
     aViewGraveyard->setShortcut(shortcuts.getSingleShortcut("Player/aViewGraveyard"));
+    aDrawCryptCard->setShortcut(shortcuts.getSingleShortcut("Player/aDrawCryptCard"));
     aDrawCard->setShortcut(shortcuts.getSingleShortcut("Player/aDrawCard"));
     aDrawCards->setShortcut(shortcuts.getSingleShortcut("Player/aDrawCards"));
     aUndoDraw->setShortcut(shortcuts.getSingleShortcut("Player/aUndoDraw"));
@@ -951,6 +959,7 @@ void Player::setShortcutsInactive()
     aViewHand->setShortcut(QKeySequence());
     aViewTopCards->setShortcut(QKeySequence());
     aViewGraveyard->setShortcut(QKeySequence());
+    aDrawCryptCard->setShortcut(QKeySequence());
     aDrawCard->setShortcut(QKeySequence());
     aDrawCards->setShortcut(QKeySequence());
     aUndoDraw->setShortcut(QKeySequence());
@@ -1009,6 +1018,7 @@ void Player::setDeck(const DeckLoader &_deck)
     createPredefinedTokenMenu->setEnabled(false);
     predefinedTokens.clear();
     InnerDecklistNode *tokenZone = dynamic_cast<InnerDecklistNode *>(deck->getRoot()->findChild(DECK_ZONE_TOKENS));
+    // InnerDecklistNode *cryptZone = dynamic_cast<InnerDecklistNode *>(deck->getRoot()->findChild(DECK_ZONE_CRYPT));
 
     if (tokenZone) {
         if (tokenZone->size() > 0)
@@ -1103,6 +1113,13 @@ void Player::actViewSideboard()
 void Player::actShuffle()
 {
     sendGameCommand(Command_Shuffle());
+}
+
+void Player::actDrawCryptCard()
+{
+    Command_DrawCryptCards cmd;
+    cmd.set_number(1);
+    sendGameCommand(cmd);
 }
 
 void Player::actDrawCard()
@@ -1359,7 +1376,7 @@ void Player::actMoveBottomCardsToGrave()
 
     bool ok;
     int number =
-        QInputDialog::getInt(game, tr("Move bottom cards to grave"), tr("Number of cards: (max. %1)").arg(maxCards),
+        QInputDialog::getInt(game, tr("Move bottom cards to ash heap"), tr("Number of cards: (max. %1)").arg(maxCards),
                              defaultNumberBottomCards, 1, maxCards, 1, &ok);
     if (!ok) {
         return;
@@ -1391,7 +1408,7 @@ void Player::actMoveBottomCardsToExile()
 
     bool ok;
     int number =
-        QInputDialog::getInt(game, tr("Move bottom cards to exile"), tr("Number of cards: (max. %1)").arg(maxCards),
+        QInputDialog::getInt(game, tr("Remove bottom cards from the game"), tr("Number of cards: (max. %1)").arg(maxCards),
                              defaultNumberBottomCards, 1, maxCards, 1, &ok);
     if (!ok) {
         return;
@@ -2194,6 +2211,37 @@ void Player::eventAttachCard(const Event_AttachCard &event)
     updateCardMenu(startCard);
 }
 
+void Player::eventDrawCryptCards(const Event_DrawCryptCards &event)
+{
+    // Todo; implement the crypt card draw.
+    CardZone *crypt = zones.value("crypt");
+
+
+    const int listSize = event.cards_size();
+    if (listSize) {
+        for (int i = 0; i < listSize; ++i) {
+            const ServerInfo_Card &cardInfo = event.cards(i);
+            CardItem *card = crypt->takeCard(0, cardInfo.id());
+            card->setFaceDown(true);
+            card->setName(QString::fromStdString(cardInfo.name()));
+            qDebug() << "CRYPT CARD :: " << card->getName();
+            table->addCard(card, false, -1);
+        }
+    } else {
+        const int number = event.number();
+        for (int i = 0; i < number; ++i) {
+            //qDebug() << "CRYPT CARD :: " << card;
+            CardItem* card = crypt->takeCard(0, -1);
+            card->setFaceDown(true);
+            table->addCard(card, false, -1);
+            // hand->addCard(deck->takeCard(0, -1), false, -1);
+        }
+    }
+
+    crypt->reorganizeCards();
+    emit logDrawCards(this, event.number(), crypt->getCards().size() == 0);
+}
+
 void Player::eventDrawCards(const Event_DrawCards &event)
 {
     CardZone *deck = zones.value("deck");
@@ -2386,6 +2434,7 @@ void Player::processPlayerInfo(const ServerInfo_Player &info)
     const int zoneListSize = info.zone_list_size();
     for (int i = 0; i < zoneListSize; ++i) {
         const ServerInfo_Zone &zoneInfo = info.zone_list(i);
+
         CardZone *zone = zones.value(QString::fromStdString(zoneInfo.name()), 0);
         if (!zone) {
             continue;
@@ -3369,7 +3418,7 @@ void Player::updateCardMenu(const CardItem *card)
                     ptMenu->addAction(aIncPT);
                     ptMenu->addAction(aDecPT);
                     ptMenu->addSeparator();
-                    ptMenu->addAction(aSetPT);
+                    ptMenu->addAction(aSetBlood);
                     ptMenu->addAction(aResetPT);
                 }
 

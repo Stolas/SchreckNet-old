@@ -55,7 +55,7 @@ public:
     ~AbstractCardItem();
     QRectF boundingRect() const;
     QSizeF getTranslatedSize(QPainter *painter) const;
-    void paintPicture(QPainter *painter, const QSizeF &translatedSize, int angle);
+    void paintPicture(QPainter *painter, const QSizeF &translatedSize, int angle, bool isCrypt);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     CardInfoPtr getInfo() const
     {
