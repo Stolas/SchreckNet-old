@@ -242,7 +242,7 @@ if(UNIX)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cockatrice.desktop DESTINATION ${DESKTOPDIR})
   endif()
 elseif(WIN32)
-  install(TARGETS cockatrice RUNTIME DESTINATION ./)
+    install(TARGETS cockatrice RUNTIME DESTINATION ./)
 endif()
 
 if(APPLE)
@@ -288,6 +288,12 @@ Data = Resources\")
     COMPONENT Runtime
   )
 endif()
+
+qt_generate_deploy_app_script(TARGET cockatrice
+                              OUTPUT_SCRIPT deploy_script
+                              NO_UNSUPPORTED_PLATFORM_ERROR)
+install(SCRIPT ${deploy_script})
+
 
 if(WIN32)
   # these needs to be relative to CMAKE_INSTALL_PREFIX
