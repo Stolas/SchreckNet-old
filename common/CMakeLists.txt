@@ -32,7 +32,10 @@ set(common_SOURCES
 )
 
 set(ORACLE_LIBS)
+if (MSVC)
 # -- /Zc:__cplusplus /permissive-
+    add_compile_options(/Zc:__cplusplus /permissive-)
+endif()
 
 include_directories(pb)
 include_directories(sfmt)

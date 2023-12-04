@@ -218,6 +218,7 @@ set(CMAKE_AUTOMOC TRUE)
 
 # Find other needed libraries
 find_package(Protobuf REQUIRED)
+# set(Protobuf_USE_STATIC_LIBS on)
 if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
   message(FATAL_ERROR "No protoc command found!")
 else()
@@ -237,7 +238,7 @@ endif()
 # Package builder
 set(CPACK_PACKAGE_CONTACT "Zach Halpern <zach@cockatrice.us>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME}")
-set(CPACK_PACKAGE_VENDOR "Cockatrice Development Team")
+set(CPACK_PACKAGE_VENDOR "SchreckNET Development Team")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")

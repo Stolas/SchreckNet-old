@@ -137,7 +137,7 @@ void CardDatabaseModel::cardDatabaseEnabledSetsChanged()
 void CardDatabaseModel::cardAdded(CardInfoPtr card)
 {
     /* Todo; Fix this set stuff, right now we enable everything. */
-    if (checkCardHasAtLeastOneEnabledSet(card) || true) {
+    if (checkCardHasAtLeastOneEnabledSet(card)) {
     //     // add the card if it's present in at least one enabled set
         beginInsertRows(QModelIndex(), cardList.size(), cardList.size());
         cardList.append(card);

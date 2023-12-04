@@ -256,9 +256,9 @@ CardInfoPtr CardInfo::newInstance(const QString &_name,
 }
 
 
-/* Todo; Optimize out */
 QString CardInfo::getCorrectedName() const
 {
+    // Todo; Mithras needs to be filtered.
     return name;
     //QString result = name;
     // Fire // Ice, Circle of Protection: Red, "Ach! Hans, Run!", Who/What/When/Where/Why, Question Elemental?

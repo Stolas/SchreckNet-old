@@ -183,15 +183,19 @@ set(COCKATRICE_UNIX_QM_INSTALL_DIR "share/cockatrice/translations")
 set(COCKATRICE_WIN32_QM_INSTALL_DIR "translations")
 
 if(Qt6_FOUND)
-  qt6_add_executable(
-    cockatrice
-    WIN32
-    MACOSX_BUNDLE
-    ${cockatrice_SOURCES}
-    ${cockatrice_RESOURCES_RCC}
-    ${cockatrice_MOC_SRCS}
-    MANUAL_FINALIZATION
-  )
+    qt6_add_executable(
+        cockatrice
+        WIN32
+        MACOSX_BUNDLE
+        ${cockatrice_SOURCES}
+        ${cockatrice_RESOURCES_RCC}
+        ${cockatrice_MOC_SRCS}
+        MANUAL_FINALIZATION
+        )
+        #if (MSVC)
+        # set_property(TARGET cockatrice PROPERTY CXX_STANDARD 17)
+        # target_compile_options(cockatrice PUBLIC "/Zc:__cplusplus")
+        #endif()
 elseif(Qt5_FOUND)
   # Qt5 Translations need to be linked at executable creation time
   if(Qt5LinguistTools_FOUND)
@@ -289,10 +293,15 @@ Data = Resources\")
   )
 endif()
 
-qt_generate_deploy_app_script(TARGET cockatrice
-                              OUTPUT_SCRIPT deploy_script
-                              NO_UNSUPPORTED_PLATFORM_ERROR)
-install(SCRIPT ${deploy_script})
+## # Run in QT
+## qt_generate_deploy_app_script(
+##     TARGET cockatrice
+##      QT_DEPLOY_SCRIPT
+##     NO_TRANSLATIONS
+##     NO_COMPILER_RUNTIME)
+## 
+## install(SCRIPT ${QT_DEPLOY_SCRIPT})
+## Install protobuf.dll
 
 
 if(WIN32)
